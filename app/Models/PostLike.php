@@ -57,7 +57,7 @@ class PostLike extends Model
         static::create([
             'user_id' => $userId,
             'post_id' => $postId,
-            'liked_at' => now(),
+            // 'liked_at' => now(),
         ]);
 
         return true; // Like added

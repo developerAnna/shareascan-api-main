@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable  implements MustVerifyEmail
 {
@@ -69,5 +70,31 @@ class User extends Authenticatable  implements MustVerifyEmail
     public function linkedSocialAccounts()
     {
         return $this->hasOne(LinkedSocialAccount::class);
+    }
+
+    /**
+     * Users this user is following
+     */
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'user_follows',
+            'follower_id',
+            'following_id'
+        )->withTimestamps();
+    }
+
+    /**
+     * Users following this user
+     */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'user_follows',
+            'following_id',
+            'follower_id'
+        )->withTimestamps();
     }
 }

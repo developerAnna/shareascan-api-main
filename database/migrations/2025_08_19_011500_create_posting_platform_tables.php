@@ -17,7 +17,7 @@ return new class extends Migration
     public function up(): void
     {
         // Create all tables for the Twitter-style posting platform
-
+        
         // Users table (core user management) - Skip since it's already created
         // Schema::create('users', function (Blueprint $table) {
         //     $table->id();
@@ -57,25 +57,6 @@ return new class extends Migration
             $table->boolean('is_published')->default(true);
             $table->timestamps();
         });
-
-        // Schema::create('posts', function (Blueprint $table) {
-        //     $table->id();
-        //     $table->foreignId('user_id')->constrained();
-        //     $table->text('content');
-        //     $table->string('type')->default('text'); // 'text', 'image', 'video', 'poll'
-        //     $table->boolean('is_reply')->default(false);
-        //     $table->bigInteger('parent_post_id')->nullable();
-        //     $table->boolean('is_quote')->default(false);
-        //     $table->bigInteger('quoted_post_id')->nullable();
-        //     // $table->string('visibility', 20)->default('public')->nullable();
-        //     $table->string('location')->nullable();
-        //     $table->string('qr_code_path')->nullable();
-        //     $table->timestamp('scheduled_at')->nullable();
-        //     // $table->timestamp('published_at')->nullable();
-        //     // $table->string('status', 20)->default('published'); // 'draft', 'published', 'scheduled', 'deleted'
-        //     $table->timestamps();
-        //     $table->softDeletes();
-        // });
 
         // Post likes table
         Schema::create('post_likes', function (Blueprint $table) {
@@ -277,3 +258,4 @@ return new class extends Migration
         Schema::dropIfExists('password_reset_tokens');
     }
 };
+

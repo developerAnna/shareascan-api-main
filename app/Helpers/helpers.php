@@ -570,7 +570,7 @@ if (! function_exists('getSelectedVariationPrice')) {
         if($merchmake_product == false){
             return null;
         }
-        
+
         $variation = [];
 
         foreach ($merchmake_product['variations'] as $product_variation) {
@@ -844,7 +844,9 @@ if (!function_exists('generateQR')) {
         // Set folder path based on the source
         if ($source == 'admin') {
             $folderPath = 'qrcodes/';
-        } else {
+        } else if($source == 'post') {
+            $folderPath = 'posts/';
+        }else {
             $folderPath = 'OrderItemQrcodes/';
         }
 

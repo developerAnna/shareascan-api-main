@@ -549,7 +549,7 @@ class PostController extends Controller
     {
         try {
             // Generate the public URL for the post
-            $postUrl = env('FRONTEND_URL', 'http://localhost:5900') . "/users/{$post->user_id}/posts/{$post->id}";
+            $postUrl = env('FRONT_APP_URL', 'http://localhost:5900') . "/users/{$post->user_id}/posts/{$post->id}";
 
             // Generate QR code filename
             $filename = "qr-codes/posts/post_{$post->id}_" . time() . '.png';
@@ -557,8 +557,11 @@ class PostController extends Controller
             // Generate QR code using the existing helper function
             $qrCodeData = generateQR('#000000', [0, 0, 0], $postUrl, 'post');
 
+            $qr_code_path = $qrCodeData['filepath'] ?? $filename;
+
             // Update post with QR code path
-            $post->update(['qr_code_path' => $filename]);
+            // $post->update(['qr_code_path' => $filename]);
+            $post->update(['qr_code_path' => $qr_code_path]);
 
             \Log::info('QR Code generated successfully for post', [
                 'post_id' => $post->id,
