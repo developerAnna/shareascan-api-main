@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Post;
+use App\Models\PostLike;
+use App\Models\PostMedia;
+use App\Models\PostRepost;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Services\ImageKitService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
-use App\Models\Post;
-use App\Models\PostMedia;
-use App\Models\PostLike;
-use App\Models\PostRepost;
-use App\Services\ImageKitService;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -59,10 +60,215 @@ class PostController extends Controller
     /**
      * Store a newly created post
      */
+    // public function store(Request $request): JsonResponse
+    // {
+
+    //     // $post = new Post();
+    //     // $post->user_id = Auth::user()->id;
+    //     // $post->content = $request->content;
+    //     // $post->type = $request->has('media') && count($request->media) > 0 ? 'media' : 'text';
+    //     // $post->visibility = $request->visibility ?? 'public';
+    //     // $post->location = $request->location;
+    //     // $post->scheduled_at =  $request->scheduled_at;
+    //     // $post->status = $request->scheduled_at ? 'scheduled' : 'published';
+    //     // $post->published_at = $request->scheduled_at ? null : now();
+    //     // $post->save();
+
+    //     // if ($post->save()) {
+    //     //     Log::info('Post saved successfully', ['post_id' => $post->id]);
+    //     // } else {
+    //     //     Log::error('Post save failed', ['post' => $post]);
+    //     // }
+
+    //     // dd("done");
+
+
+    //     // Log the incoming request
+    //     \Log::info('Post creation request received', [
+    //         'request_data' => $request->all(),
+    //         'headers' => $request->headers->all(),
+    //         'user_agent' => $request->userAgent(),
+    //         'ip' => $request->ip(),
+    //     ]);
+
+    //     $validator = Validator::make($request->all(), [
+    //         'content' => 'required|string|max:280',
+    //         'visibility' => 'in:public,followers,private',
+    //         'location' => 'nullable|string|max:255',
+    //         'scheduled_at' => 'nullable|date|after:now',
+    //         'media' => 'nullable|array|max:4', // Max 4 media files
+    //         'media.*.file_id' => 'required_with:media|string',
+    //         'media.*.url' => 'required_with:media|string|url',
+    //         'media.*.thumbnail_url' => 'required_with:media|string|url',
+    //         'media.*.alt_text' => 'nullable|string|max:255',
+    //         'media.*.caption' => 'nullable|string|max:500',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         \Log::error('Post validation failed', [
+    //             'errors' => $validator->errors(),
+    //             'request_data' => $request->all(),
+    //         ]);
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Validation failed',
+    //             'errors' => $validator->errors(),
+    //         ], 422);
+    //     }
+
+    //     Log::info('Post validation passed, proceeding with creation');
+
+    //     try {
+    //         Log::info('Starting database transaction for post creation');
+    //         DB::beginTransaction();
+
+    //         // Get the authenticated user
+    //         $user = Auth::user();
+    //         $userId = $user ? $user->id : null;
+
+    //         if (!$userId) {
+    //             throw new \Exception('User not authenticated');
+    //         }
+
+    //         Log::info('Creating post with data', [
+    //             'user_id' => $userId,
+    //             'content' => $request->content,
+    //             'type' => $request->has('media') && count($request->media) > 0 ? 'media' : 'text',
+    //             'visibility' => $request->visibility ?? 'public',
+    //             'location' => $request->location,
+    //             'scheduled_at' => $request->scheduled_at,
+    //             'status' => $request->scheduled_at ? 'scheduled' : 'published',
+    //             'published_at' => $request->scheduled_at ? null : now(),
+    //         ]);
+
+    //         // $post = Post::create([
+    //         //     'user_id' => $userId,
+    //         //     'content' => $request->content,
+    //         //     'type' => $request->has('media') && count($request->media) > 0 ? 'media' : 'text',
+    //         //     'visibility' => $request->visibility ?? 'public',
+    //         //     'location' => $request->location,
+    //         //     'scheduled_at' => $request->scheduled_at,
+    //         //     'status' => $request->scheduled_at ? 'scheduled' : 'published',
+    //         //     'published_at' => $request->scheduled_at ? null : now(),
+    //         // ]);
+
+    //         // $post = DB::table('posts')->insert([
+    //         //     'user_id' => $userId,
+    //         //     'content' => $request->content,
+    //         //     'type' => $request->has('media') && count($request->media) > 0 ? 'media' : 'text',
+    //         //     'visibility' => $request->visibility ?? 'public',
+    //         //     'location' => $request->location,
+    //         //     'scheduled_at' => $request->scheduled_at,
+    //         //     'status' => $request->scheduled_at ? 'scheduled' : 'published',
+    //         //     'published_at' => $request->scheduled_at ? null : now(),
+    //         // ]);
+
+
+    //         $post = new Post();
+    //         $post->user_id = Auth::user()->id;
+    //         $post->content = $request->content;
+    //         $post->type = $request->has('media') && count($request->media) > 0 ? 'media' : 'text';
+    //         $post->visibility = $request->visibility ?? 'public';
+    //         $post->location = $request->location;
+    //         $post->scheduled_at =  $request->scheduled_at;
+    //         $post->status = $request->scheduled_at ? 'scheduled' : 'published';
+    //         $post->published_at = $request->scheduled_at ? null : now();
+    //         $post->save();
+
+    //         if ($post->save()) {
+    //             Log::info('Post saved successfully', ['post_id' => $post->id]);
+    //         } else {
+    //             Log::error('Post save failed', ['post' => $post]);
+    //         }
+
+
+    //         Log::info('Post created successfully', [
+    //             'post_id' => $post->id,
+    //             'post_data' => $post->toArray(),
+    //         ]);
+
+    //         // Generate QR code for public posts
+    //         if ($post->visibility === 'public' && $post->status === 'published') {
+    //             $this->generatePostQrCode($post);
+    //         }
+
+    //         // Handle media (already uploaded to ImageKit)
+    //         if ($request->has('media') && is_array($request->media)) {
+    //             Log::info('Processing media for post', [
+    //                 'media_count' => count($request->media),
+    //                 'media_data' => $request->media,
+    //             ]);
+
+    //             foreach ($request->media as $index => $mediaData) {
+    //                 Log::info('Creating media record', [
+    //                     'index' => $index,
+    //                     'media_data' => $mediaData,
+    //                     'post_id' => $post->id,
+    //                 ]);
+
+    //                 // Create media record using already uploaded data
+    //                 $media = PostMedia::create([
+    //                     'post_id' => $post->id,
+    //                     'media_type' => $this->getMediaTypeFromUrl($mediaData['url']),
+    //                     'media_url' => $mediaData['url'],
+    //                     'thumbnail_url' => $mediaData['thumbnail_url'],
+    //                     'alt_text' => $mediaData['alt_text'] ?? null,
+    //                     'caption' => $mediaData['caption'] ?? null,
+    //                     'file_size' => 0, // We don't have this info from ImageKit
+    //                     'width' => null, // We don't have this info from ImageKit
+    //                     'height' => null, // We don't have this info from ImageKit
+    //                     'order' => $index,
+    //                     'is_processed' => true,
+    //                 ]);
+
+    //                 Log::info('Media record created successfully', [
+    //                     'media_id' => $media->id,
+    //                     'media_data' => $media->toArray(),
+    //                 ]);
+    //             }
+    //         } else {
+    //             Log::info('No media to process for this post');
+    //         }
+
+    //         Log::info('Committing database transaction');
+    //         DB::commit();
+
+    //         $post->load(['user', 'media']);
+
+    //         Log::info('Post creation completed successfully', [
+    //             'post_id' => $post->id,
+    //             'final_post_data' => $post->toArray(),
+    //         ]);
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Post created successfully',
+    //             'data' => new PostResource($post),
+    //         ], 201);
+    //     } catch (\Exception $e) {
+    //         Log::error('Post creation failed with exception', [
+    //             'error_message' => $e->getMessage(),
+    //             'error_code' => $e->getCode(),
+    //             'error_file' => $e->getFile(),
+    //             'error_line' => $e->getLine(),
+    //             'error_trace' => $e->getTraceAsString(),
+    //             'request_data' => $request->all(),
+    //         ]);
+
+    //         DB::rollBack();
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to create post',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function store(Request $request): JsonResponse
     {
-        // Log the incoming request
-        \Log::info('Post creation request received', [
+        Log::info('Post creation request received', [
             'request_data' => $request->all(),
             'headers' => $request->headers->all(),
             'user_agent' => $request->userAgent(),
@@ -74,7 +280,7 @@ class PostController extends Controller
             'visibility' => 'in:public,followers,private',
             'location' => 'nullable|string|max:255',
             'scheduled_at' => 'nullable|date|after:now',
-            'media' => 'nullable|array|max:4', // Max 4 media files
+            'media' => 'nullable|array|max:4',
             'media.*.file_id' => 'required_with:media|string',
             'media.*.url' => 'required_with:media|string|url',
             'media.*.thumbnail_url' => 'required_with:media|string|url',
@@ -83,7 +289,7 @@ class PostController extends Controller
         ]);
 
         if ($validator->fails()) {
-            \Log::error('Post validation failed', [
+            Log::error('Post validation failed', [
                 'errors' => $validator->errors(),
                 'request_data' => $request->all(),
             ]);
@@ -95,117 +301,72 @@ class PostController extends Controller
             ], 422);
         }
 
-        \Log::info('Post validation passed, proceeding with creation');
+        Log::info('Post validation passed');
 
         try {
-            \Log::info('Starting database transaction for post creation');
-            DB::beginTransaction();
+            // DB::beginTransaction();
 
-            // Get the authenticated user
             $user = Auth::user();
-            $userId = $user ? $user->id : null;
-
-            if (!$userId) {
+            if (!$user) {
                 throw new \Exception('User not authenticated');
             }
 
-            \Log::info('Creating post with data', [
-                'user_id' => $userId,
-                'content' => $request->content,
-                'type' => $request->has('media') && count($request->media) > 0 ? 'media' : 'text',
-                'visibility' => $request->visibility ?? 'public',
-                'location' => $request->location,
-                'scheduled_at' => $request->scheduled_at,
-                'status' => $request->scheduled_at ? 'scheduled' : 'published',
-                'published_at' => $request->scheduled_at ? null : now(),
-            ]);
+            // Create post
+            $post = new Post();
+            $post->user_id = $user->id;
+            $post->content = $request->content;
+            $post->type = $request->has('media') && count($request->media) > 0 ? 'media' : 'text';
+            $post->visibility = $request->visibility ?? 'public';
+            $post->location = $request->location;
+            $post->scheduled_at = $request->scheduled_at;
+            $post->status = $request->scheduled_at ? 'scheduled' : 'published';
+            $post->published_at = $request->scheduled_at ? null : now();
+            $post->save(); // save only once
 
-            $post = Post::create([
-                'user_id' => $userId,
-                'content' => $request->content,
-                'type' => $request->has('media') && count($request->media) > 0 ? 'media' : 'text',
-                'visibility' => $request->visibility ?? 'public',
-                'location' => $request->location,
-                'scheduled_at' => $request->scheduled_at,
-                'status' => $request->scheduled_at ? 'scheduled' : 'published',
-                'published_at' => $request->scheduled_at ? null : now(),
-            ]);
-
-            \Log::info('Post created successfully', [
-                'post_id' => $post->id,
-                'post_data' => $post->toArray(),
-            ]);
+            Log::info('Post saved successfully', ['post_id' => $post->id]);
 
             // Generate QR code for public posts
             if ($post->visibility === 'public' && $post->status === 'published') {
                 $this->generatePostQrCode($post);
             }
 
-            // Handle media (already uploaded to ImageKit)
+            // Handle media
             if ($request->has('media') && is_array($request->media)) {
-                \Log::info('Processing media for post', [
-                    'media_count' => count($request->media),
-                    'media_data' => $request->media,
-                ]);
-
                 foreach ($request->media as $index => $mediaData) {
-                    \Log::info('Creating media record', [
-                        'index' => $index,
-                        'media_data' => $mediaData,
-                        'post_id' => $post->id,
-                    ]);
-
-                    // Create media record using already uploaded data
-                    $media = PostMedia::create([
+                    PostMedia::create([
                         'post_id' => $post->id,
                         'media_type' => $this->getMediaTypeFromUrl($mediaData['url']),
                         'media_url' => $mediaData['url'],
                         'thumbnail_url' => $mediaData['thumbnail_url'],
                         'alt_text' => $mediaData['alt_text'] ?? null,
                         'caption' => $mediaData['caption'] ?? null,
-                        'file_size' => 0, // We don't have this info from ImageKit
-                        'width' => null, // We don't have this info from ImageKit
-                        'height' => null, // We don't have this info from ImageKit
+                        'file_size' => 0,
+                        'width' => null,
+                        'height' => null,
                         'order' => $index,
                         'is_processed' => true,
                     ]);
-
-                    \Log::info('Media record created successfully', [
-                        'media_id' => $media->id,
-                        'media_data' => $media->toArray(),
-                    ]);
                 }
-            } else {
-                \Log::info('No media to process for this post');
             }
 
-            \Log::info('Committing database transaction');
-            DB::commit();
+            // DB::commit();
 
-            $post->load(['user', 'media']);
-
-            \Log::info('Post creation completed successfully', [
-                'post_id' => $post->id,
-                'final_post_data' => $post->toArray(),
-            ]);
+            $post->load(['user', 'media']); // load relations after commit
 
             return response()->json([
                 'success' => true,
                 'message' => 'Post created successfully',
                 'data' => new PostResource($post),
             ], 201);
-
         } catch (\Exception $e) {
-            \Log::error('Post creation failed with exception', [
+            // DB::rollBack();
+
+            \Log::error('Post creation failed', [
                 'error_message' => $e->getMessage(),
-                'error_code' => $e->getCode(),
                 'error_file' => $e->getFile(),
                 'error_line' => $e->getLine(),
-                'error_trace' => $e->getTraceAsString(),
                 'request_data' => $request->all(),
             ]);
-
-            DB::rollBack();
 
             return response()->json([
                 'success' => false,
@@ -214,6 +375,7 @@ class PostController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Display the specified post
@@ -560,17 +722,15 @@ class PostController extends Controller
             $qr_code_path = $qrCodeData['filepath'] ?? $filename;
 
             // Update post with QR code path
-            // $post->update(['qr_code_path' => $filename]);
             $post->update(['qr_code_path' => $qr_code_path]);
 
-            \Log::info('QR Code generated successfully for post', [
+            Log::info('QR Code generated successfully for post', [
                 'post_id' => $post->id,
                 'qr_code_path' => $filename,
                 'post_url' => $postUrl,
             ]);
-
         } catch (\Exception $e) {
-            \Log::error('Failed to generate QR code for post', [
+            Log::error('Failed to generate QR code for post', [
                 'post_id' => $post->id,
                 'error' => $e->getMessage(),
             ]);

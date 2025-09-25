@@ -28,7 +28,7 @@ class ImageKitService
         try {
             // Generate unique filename
             $filename = $this->generateUniqueFilename($file);
-            
+
             // Log the upload attempt
             Log::info('ImageKit upload attempt', [
                 'filename' => $filename,
@@ -51,7 +51,7 @@ class ImageKitService
 
             if ($uploadResponse->result) {
                 $data = $uploadResponse->result;
-                
+
                 Log::info('ImageKit upload successful', [
                     'file_id' => $data->fileId,
                     'url' => $data->url,
@@ -105,7 +105,7 @@ class ImageKitService
         }
 
         $queryParams = [];
-        
+
         foreach ($transformations as $key => $value) {
             if (is_array($value)) {
                 $queryParams[] = $key . '-' . implode('-', $value);
@@ -169,7 +169,7 @@ class ImageKitService
     {
         try {
             $response = $this->imageKit->getFileDetails($fileId);
-            
+
             if ($response->result) {
                 return (array) $response->result;
             }
@@ -191,7 +191,7 @@ class ImageKitService
         $extension = $file->getClientOriginalExtension();
         $timestamp = now()->timestamp;
         $random = Str::random(8);
-        
+
         return "post_{$timestamp}_{$random}.{$extension}";
     }
 
@@ -225,7 +225,7 @@ class ImageKitService
     {
         $path = parse_url($url, PHP_URL_PATH);
         $filename = basename($path);
-        
+
         return [
             'filename' => $filename,
             'extension' => pathinfo($filename, PATHINFO_EXTENSION),

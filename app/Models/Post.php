@@ -29,6 +29,10 @@ class Post extends Model
         'scheduled_at',
         'published_at',
         'status', // 'draft', 'published', 'scheduled', 'deleted'
+        'like_count',
+        'repost_count',
+        'reply_count',
+        'is_pinned',
     ];
 
     protected $casts = [

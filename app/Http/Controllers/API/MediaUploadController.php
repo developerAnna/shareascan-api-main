@@ -34,7 +34,7 @@ class MediaUploadController extends Controller
         // Determine which format we have and validate accordingly
         $files = null;
         $validator = null;
-        
+
         if ($request->hasFile('files') && is_array($request->file('files'))) {
             // We have 'files' format
             $files = $request->file('files');
@@ -70,7 +70,7 @@ class MediaUploadController extends Controller
                 'errors' => $validator->errors(),
                 'request_data' => $request->all(),
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
@@ -83,14 +83,14 @@ class MediaUploadController extends Controller
             $folder = $request->input('folder', 'posts');
             $uploadedFiles = [];
             $failedFiles = [];
-            
+
             if (!$files || !is_array($files)) {
                 throw new \Exception('No valid files found in request');
             }
-            
+
             foreach ($files as $file) {
                 $uploadResult = $imageKitService->uploadFile($file, $folder);
-                
+
                 if ($uploadResult['success']) {
                     $uploadedFiles[] = [
                         'original_name' => $file->getClientOriginalName(),
@@ -237,7 +237,7 @@ class MediaUploadController extends Controller
 
         try {
             $imageKitService = new ImageKitService();
-            
+
             $transformations = [];
             if ($request->width) $transformations['w'] = $request->width;
             if ($request->height) $transformations['h'] = $request->height;

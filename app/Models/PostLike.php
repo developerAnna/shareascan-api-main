@@ -13,7 +13,7 @@ class PostLike extends Model
     protected $fillable = [
         'user_id',
         'post_id',
-        'liked_at',
+        // 'liked_at',
     ];
 
     protected $casts = [
