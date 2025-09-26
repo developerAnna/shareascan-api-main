@@ -34,11 +34,22 @@ class HomeController extends Controller
     {
         $data['total_users'] = User::count();
         $data['total_orders'] = Order::where('status', 1)->count();
-        $data['current_day_sales'] = Order::where('status', 1)->where('payment_status', 'Completed')
-            ->whereDate('created_at', Carbon::today())
-            ->sum('total');
+        // $data['current_day_sales'] = Order::where('status', 1)->where('payment_status', 'Completed')
+        //     ->whereDate('created_at', Carbon::today())
+        //     ->sum('total');
 
-        $data['total_sales'] = Order::where('status', 1)->where('payment_status', 'Completed')->sum('total');
+        // $data['total_sales'] = Order::where('status', 1)->where('payment_status', 'Completed')->sum('total');
+
+        $data['current_day_sales'] = Order::where('status', 1)
+            ->where('payment_status', 'Completed')
+            ->whereDate('created_at', Carbon::today())
+            ->selectRaw('sum("total"::numeric) as total_sales')
+            ->value('total_sales');
+
+        $data['total_sales'] = Order::where('status', 1)
+            ->where('payment_status', 'Completed')
+            ->selectRaw('sum("total"::numeric) as total_sales')
+            ->value('total_sales');
 
         return view('admin.dashboard')->with($data);
     }
