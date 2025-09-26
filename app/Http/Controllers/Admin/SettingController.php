@@ -26,7 +26,6 @@ class SettingController extends Controller
 
     public function store(Request $request)
     {
-
         $tabName = 'store_settings';
         if (isset($request->email_settings) && $request->email_settings == "email_settings") {
             $request->validate([
@@ -58,7 +57,8 @@ class SettingController extends Controller
 
 
         // Start the transaction
-        DB::beginTransaction();
+        // DB::beginTransaction();
+        // DB::transaction();
 
         try {
             foreach ($_POST as $key => $value) {
@@ -78,13 +78,14 @@ class SettingController extends Controller
                 }
             }
 
-            DB::commit();
+            // DB::commit();
 
             // Return a response after successful update
             return redirect()->back()->with('success', 'Settings updated successfully.')->with('activeTab', $tabName);
         } catch (\Exception $e) {
-            // If any exception occurs, rollback the transaction
-            DB::rollBack();
+            // dd($e->getMessage());
+            // // If any exception occurs, rollback the transaction
+            // DB::rollBack();
 
             // Log the exception (optional, for debugging)
             Log::error('Error updating settings: ' . $e->getMessage());
