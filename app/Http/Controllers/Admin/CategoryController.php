@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 
 class CategoryController extends Controller
@@ -64,6 +65,7 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
+      
         DB::beginTransaction();
 
         try {
@@ -77,10 +79,12 @@ class CategoryController extends Controller
 
             $category = $request->input('category_id');
 
+
             // Split the category value into ID and Title
             list($category_id, $category_title) = explode('|', $category);
+            $category_slug = Str::slug($category_title);
 
-            Category::create(['category_id' => $category_id, 'title' => $category_title, 'description' => $request->description, 'image' => isset($imageName) ? $imageName : null]);
+            Category::create(['category_id' => $category_id, 'name' => $category_title, 'slug' => $category_slug, 'description' => $request->description, 'image' => isset($imageName) ? $imageName : null]);
 
             // Commit the transaction
             DB::commit();

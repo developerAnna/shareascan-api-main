@@ -21,11 +21,18 @@ class CategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+       
+        $category = $_REQUEST['category_id'];
+        list($category_id, $category_title) = explode('|', $category);
+
+        $category_id = (int) $category_id;
+
         $id = $this->route('category');
+      
         return [
-            'category_id' => $this->isMethod('post')
-                ? 'required|unique:categories,category_id'
-                : 'required|unique:categories,category_id,' . $id,
+            // 'category_id' => $this->isMethod('post')
+            //     ? 'required|unique:categories,category_id'
+            //     : 'required|unique:categories,category_id,' . $id,
 
             // Validate description: required and must be a string for both POST and PUT
             'description' => 'required|string',

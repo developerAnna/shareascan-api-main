@@ -52,8 +52,8 @@
                             searchable: false
                         },
                         {
-                            data: 'title',
-                            name: 'title'
+                            data: 'name',
+                            name: 'name'
                         },
                         {
                             data: 'image',
