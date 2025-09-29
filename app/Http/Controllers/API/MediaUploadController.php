@@ -148,8 +148,9 @@ class MediaUploadController extends Controller
         }
 
         try {
+           
             $imageKitService = new ImageKitService();
-            $deleted = $imageKitService->deleteFile($request->file_id);
+            $deleted = $imageKitService->deleteMediaFile($request->file_id);
 
             if ($deleted) {
                 return response()->json([

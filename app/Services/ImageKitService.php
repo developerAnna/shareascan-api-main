@@ -148,7 +148,7 @@ class ImageKitService
     /**
      * Delete file from ImageKit
      */
-    public function deleteFile(string $fileId): bool
+    public function deleteMediaFile(string $fileId): bool
     {
         try {
             $response = $this->imageKit->deleteFile($fileId);
@@ -169,6 +169,7 @@ class ImageKitService
     {
         try {
             $response = $this->imageKit->getFileDetails($fileId);
+
 
             if ($response->result) {
                 return (array) $response->result;

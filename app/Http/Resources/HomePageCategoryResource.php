@@ -16,7 +16,7 @@ class HomePageCategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => get_category_title($this->title),
+            'title' => get_category_title($this->name),
             'description' => $this->description,
             'image_name' => $this->image ?? '',
             'image_path' => $this->image ?  asset('CategoryImages/' . $this->image) : '',

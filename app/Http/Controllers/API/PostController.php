@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\PostLike;
 use App\Models\PostMedia;
 use App\Models\PostRepost;
+use App\Models\PostReply;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Services\ImageKitService;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
+use App\Http\Resources\PostReplyResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -612,18 +614,42 @@ class PostController extends Controller
      */
     public function replies($id, Request $request): JsonResponse
     {
+        // $perPage = $request->get('per_page', 20);
+        // $page = $request->get('page', 1);
+
+        // $replies = Post::with(['user', 'media', 'likes', 'reposts'])
+        //     ->where('parent_post_id', $id)
+        //     ->published()
+        //     ->orderBy('published_at', 'asc')
+        //     ->paginate($perPage, ['*'], 'page', $page);
+
+        // return response()->json([
+        //     'success' => true,
+        //     'data' => PostResource::collection($replies->items()),
+        //     'pagination' => [
+        //         'current_page' => $replies->currentPage(),
+        //         'last_page' => $replies->lastPage(),
+        //         'per_page' => $replies->perPage(),
+        //         'total' => $replies->total(),
+        //     ],
+        // ]);
+
         $perPage = $request->get('per_page', 20);
         $page = $request->get('page', 1);
 
-        $replies = Post::with(['user', 'media', 'likes', 'reposts'])
-            ->where('parent_post_id', $id)
-            ->published()
-            ->orderBy('published_at', 'asc')
-            ->paginate($perPage, ['*'], 'page', $page);
+        // Validate post exists
+        $post = Post::published()->findOrFail($id);
+
+        // Get top-level replies (parent_reply_id = null) for the post
+        $replies = PostReply::with(['user', 'children'])  // 'children' now recursively loads all levels
+        ->where('post_id', $id)
+        ->whereNull('parent_reply_id')
+        ->orderBy('created_at', 'asc')
+        ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'success' => true,
-            'data' => PostResource::collection($replies->items()),
+            'data' => PostReplyResource::collection($replies->items()),
             'pagination' => [
                 'current_page' => $replies->currentPage(),
                 'last_page' => $replies->lastPage(),
@@ -632,6 +658,63 @@ class PostController extends Controller
             ],
         ]);
     }
+
+
+    /**
+     * Store post replies
+     */
+    public function storeReply(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'post_id' => 'required|exists:posts,id',
+                'content' => 'required|string',
+                'parent_reply_id' => 'nullable|exists:post_replies,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation Error.',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Optional: Check if parent reply belongs to the same post (if parent_reply_id given)
+            if ($request->parent_reply_id) {
+                $parentReply = PostReply::find($request->parent_reply_id);
+                if ($parentReply->post_id != $request->post_id) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Parent reply does not belong to the given post.'
+                    ], 422);
+                }
+            }
+
+            $reply = PostReply::create([
+                'post_id' => $request->post_id,
+                'user_id' => Auth::id(),
+                'content' => $request->content,
+                'parent_reply_id' => $request->parent_reply_id,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Reply posted successfully.',
+                'reply' => new PostReplyResource($reply),
+            ], 201);
+
+        } catch (Exception $e) {
+            \Log::error('Failed to post reply: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong while posting the reply.',
+                'error' => $e->getMessage(), // hide in production
+            ], 500);
+        }
+    }
+
 
     /**
      * Helper method to determine media type

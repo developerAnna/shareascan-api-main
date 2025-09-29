@@ -162,6 +162,7 @@ Route::middleware(['access-token', 'auth:sanctum'])->group(function () {
         Route::get('/my-posts', [App\Http\Controllers\API\PostController::class, 'myPosts']);
         Route::get('/users/{userId}/posts', [App\Http\Controllers\API\PostController::class, 'userPosts']);
         Route::get('/posts/{id}/replies', [App\Http\Controllers\API\PostController::class, 'replies']);
+        Route::post('/post/reply', [App\Http\Controllers\API\PostController::class, 'storeReply']);
 
         // Media upload routes
         Route::post('/media/upload', [App\Http\Controllers\API\MediaUploadController::class, 'upload']);

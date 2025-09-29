@@ -251,8 +251,12 @@ class CartController extends BaseController
     {
         if (Auth::check()) {
             $cart_items = Cart::where('user_id', Auth::id())->get();
+          
             if ($cart_items->count() > 0) {
-                $cart_total = Cart::where('user_id', Auth::id())->sum('total');
+                // $cart_total = Cart::where('user_id', Auth::id())->sum('total');
+                $cart_total = Cart::where('user_id', Auth::id())
+                            ->selectRaw('SUM(total::numeric) as cart_total')
+                            ->value('cart_total');
                 return $this->sendResponse(['car_items' => CartResource::collection($cart_items), 'cart_sub_total' => $cart_total], 'Cart retrieved successfully!');
             } else {
                 return $this->sendResponse([], 'Cart is empty.');

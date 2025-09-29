@@ -6,9 +6,9 @@
                 <span class="text-muted fw-light">Email Template /</span> List
             </h4>
         </div>
-        {{-- <div class="col-md-6 text-end">
+        <div class="col-md-6 text-end">
             <a href="{{ route('email-templates.create') }}" class="btn btn-primary">Add Email Template</a>
-        </div> --}}
+        </div>
     </div>
     <div id="flash-messages">
         <x-success-message />

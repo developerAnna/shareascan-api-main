@@ -135,15 +135,28 @@ class PayPalController extends BaseController
                     ], 400);
                 }
 
-                $shippingAddress = new Address();
-                $shippingAddress->setLine1($order->shippingAddress->address_1)
+                // $shippingAddress = new Address();
+                // $shippingAddress->setLine1($order->shippingAddress->address_1)
+                //     ->setLine2($order->shippingAddress->address_2 ?? '')
+                //     ->setCity($order->shippingAddress->city)
+                //     ->setState($order->shippingAddress->state)
+                //     ->setPostalCode($order->shippingAddress->zip)
+                //     ->setCountryCode($order->shippingAddress->country_code);
+
+                // // Create PayerInfo object and set the shipping address
+                // $payerInfo = new PayerInfo();
+                // $payerInfo->setShippingAddress($shippingAddress);
+                // $payer->setPayerInfo($payerInfo);
+
+                $shippingAddress = new \PayPal\Api\ShippingAddress();
+                $shippingAddress->setRecipientName($order->shippingAddress->name ?? 'Customer')
+                    ->setLine1($order->shippingAddress->address_1)
                     ->setLine2($order->shippingAddress->address_2 ?? '')
                     ->setCity($order->shippingAddress->city)
                     ->setState($order->shippingAddress->state)
                     ->setPostalCode($order->shippingAddress->zip)
                     ->setCountryCode($order->shippingAddress->country_code);
 
-                // Create PayerInfo object and set the shipping address
                 $payerInfo = new PayerInfo();
                 $payerInfo->setShippingAddress($shippingAddress);
                 $payer->setPayerInfo($payerInfo);
@@ -152,8 +165,8 @@ class PayPalController extends BaseController
 
                 // Set the redirect URLs
                 $redirectUrls = new RedirectUrls();
-                $redirectUrls->setReturnUrl(env('FRONT_URL') . '/thank-you');
-                $redirectUrls->setCancelUrl(env('FRONT_URL') . '/cancel');
+                $redirectUrls->setReturnUrl(env('FRONT_APP_URL') . '/thank-you');
+                $redirectUrls->setCancelUrl(env('FRONT_APP_URL') . '/cancel');
                 $payment->setRedirectUrls($redirectUrls);
 
                 // Get PayPal credentials from config
@@ -169,6 +182,8 @@ class PayPalController extends BaseController
                 $apiContext->setConfig([
                     'mode' => get_options('paypal_mode'),
                 ]);
+
+                // dd($payment, $apiContext);
 
                 // Create the payment
                 $payment->create($apiContext);
@@ -469,8 +484,9 @@ class PayPalController extends BaseController
                 // return false;
             }
 
-            return response()->json(['success' => true, 'message' => 'Webhook processed']);
+            return response()->json(['success' => true, 'message' => 'Webhook processed',200]);
         } catch (\Exception $ex) {
+            Log::info($ex->getMessage());
             Log::channel('paypal_webhook')->error('Error: ' . $ex->getMessage());
             return response()->json(['success' => false, 'message' => $ex->getMessage()], 500);
         }
