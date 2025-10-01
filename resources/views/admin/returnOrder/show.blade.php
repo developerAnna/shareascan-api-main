@@ -106,15 +106,25 @@
                         <tr>
                             <th>Return Status</th>
                             <td>
-                                <span
-                                    class="badge
-                                        @if ($return_order->return_status == 'approved') bg-success
-                                        @elseif($return_order->return_status == 'pending') bg-warning
-                                        @else bg-danger @endif">
-                                    {{ $return_order->return_status }}
-                                </span>
+                                @php
+                                    $status = $return_order->return_status ?? '';
+                                    $badgeClass = 'bg-label-secondary'; // Default
+
+                                    if ($status === 'Refunded') {
+                                        $badgeClass = 'bg-label-success';
+                                    } elseif ($status === 'Pending') {
+                                        $badgeClass = 'bg-label-primary';
+                                    } elseif ($status === 'Processing') {
+                                        $badgeClass = 'bg-label-warning';
+                                    } elseif ($status === 'Canceled') {
+                                        $badgeClass = 'bg-label-danger';
+                                    }
+                                @endphp
+
+                                <span class="badge badge-dim {{ $badgeClass }}">{{ $status }}</span>
                             </td>
                         </tr>
+
                         <tr>
                             <th>Send to MerchMake</th>
                             <td>

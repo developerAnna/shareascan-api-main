@@ -152,7 +152,14 @@ class ImageKitService
     {
         try {
             $response = $this->imageKit->deleteFile($fileId);
-            return $response->result !== null;
+            // return $response->result !== null;
+            if (isset($response->responseMetadata['statusCode']) && $response->responseMetadata['statusCode'] === 204 && $response->error === null
+            ) 
+            {
+                return true;
+            }
+
+            return false;
         } catch (\Exception $e) {
             Log::error('ImageKit delete failed', [
                 'file_id' => $fileId,

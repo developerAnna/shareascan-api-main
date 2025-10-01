@@ -45,7 +45,33 @@ class OrderController extends Controller
                     return $row->id;
                 })
 
-                ->rawColumns(['action', 'order_id'])
+                ->editColumn('payment_status',function($row){
+                    $status = $row->payment_status ?? '';
+                    if($status == 'Completed'){
+                        return "<span class='badge badge-dim bg-label-success'>{$status}</span>";
+                    }elseif($status == 'Refunded'){
+                        return "<span class='badge badge-dim bg-label-warning'>{$status}</span>";   
+                    }else{
+                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";   
+                    }
+                })
+
+                ->editColumn('order_status',function($row){
+                    $status = $row->order_status ?? '';
+                    if($status == 'Completed'){
+                        return "<span class='badge badge-dim bg-label-success'>{$status}</span>";
+                    }elseif($status == 'Pending'){
+                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";   
+                    }elseif($status == 'Cancelled'){
+                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";   
+                    }elseif($status == 'Refunded'){
+                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";   
+                    } else{
+                        return "<span class='badge badge-dim bg-label-secondary'>{$status}</span>";   
+                    }
+                })
+
+                ->rawColumns(['action', 'order_id','payment_status','order_status'])
                 ->make(true);
         }
 

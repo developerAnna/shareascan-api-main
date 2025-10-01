@@ -35,12 +35,42 @@
                                                     </tr>
                                                     <tr>
                                                         <th style="text-align: left;"><strong>Payment Status:</strong></th>
-                                                        <td>{{ $order->payment_status }}</td>
+                                                        <td>
+                                                            @php
+                                                                $status = $order->payment_status ?? '';
+                                                                $badgeClass = 'bg-label-primary'; // Default
+
+                                                                if ($status === 'Completed') {
+                                                                    $badgeClass = 'bg-label-success';
+                                                                } elseif ($status === 'Refunded') {
+                                                                    $badgeClass = 'bg-label-warning';
+                                                                }
+                                                            @endphp
+
+                                                            <span class="badge badge-dim {{ $badgeClass }}">{{ $status }}</span>
+                                                        </td>
                                                     </tr>
+
                                                     <tr>
                                                         <th style="text-align: left;"><strong>Order Status:</strong></th>
-                                                        <td>{{ $order->order_status }}</td>
+                                                        <td>
+                                                            @php
+                                                                $status = $order->order_status ?? '';
+                                                                $badgeClass = 'bg-label-secondary'; // Default badge color
+
+                                                                if ($status === 'Completed') {
+                                                                    $badgeClass = 'bg-label-success';
+                                                                } elseif ($status === 'Pending') {
+                                                                    $badgeClass = 'bg-label-primary';
+                                                                } elseif (in_array($status, ['Cancelled', 'Refunded'])) {
+                                                                    $badgeClass = 'bg-label-danger';
+                                                                }
+                                                            @endphp
+
+                                                            <span class="badge badge-dim {{ $badgeClass }}">{{ $status }}</span>
+                                                        </td>
                                                     </tr>
+
                                                     <tr>
                                                         <th style="text-align: left;"><strong>Note:</strong></th>
                                                         <td id="order-note">{{ $order->note }}</td>

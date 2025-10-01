@@ -53,26 +53,59 @@ class ReturnOrderController extends Controller
                 })
                 ->editColumn('is_send_to_merchmake', function ($row) {
                     if ($row->is_send_to_merchmake == 0) {
-                        return '<span class="text-danger">No</span>';
-                    } else if ($row->is_send_to_merchmake == 1) {
-                        return '<span class="text-success">Yes</span>';
+                        return '<span class="badge badge-dim bg-label-danger">No</span>';
+                    } elseif ($row->is_send_to_merchmake == 1) {
+                        return '<span class="badge badge-dim bg-label-success">Yes</span>';
                     } else {
-                        return null;
+                        return '<span class="badge badge-dim bg-label-secondary">Unknown</span>';
                     }
                 })
+                // ->editColumn('refund', function ($row) {
+                //     if ($row->return_status == 'Processing') {
+                //         return '<span class="text-danger">Processing</span>';
+                //     } else if ($row->return_status != "Refunded") {
+                //         return '<a href="javascript:void(0);" class="refund-to-user btn btn-secondary btn-sm"
+                //                         style="display: inline-flex; align-items: center; padding: 5px 10px;"
+                //                         data-url="' . route('refundRequest', $row['id']) . '">
+                //                      Refund To User
+                //                 </a>';
+                //     } else {
+                //         return '<span class="text-success">Refunded</span>';
+                //     }
+                // })
+
                 ->editColumn('refund', function ($row) {
-                    if ($row->return_status == 'Processing') {
-                        return '<span class="text-danger">Processing</span>';
-                    } else if ($row->return_status != "Refunded") {
-                        return '<a href="javascript:void(0);" class="refund-to-user btn btn-secondary btn-sm"
-                                        style="display: inline-flex; align-items: center; padding: 5px 10px;"
-                                        data-url="' . route('refundRequest', $row['id']) . '">
-                                     Refund To User
-                                </a>';
+                    $status = $row->return_status ?? '';
+
+                    if ($status === 'Processing') {
+                        return '<span class="badge badge-dim bg-label-warning">Processing</span>';
+                    } elseif ($status === 'Refunded') {
+                        return '<span class="badge badge-dim bg-label-success">Refunded</span>';
                     } else {
-                        return '<span class="text-success">Refunded</span>';
+                        return '<a href="javascript:void(0);" class="refund-to-user btn btn-secondary btn-sm"
+                                    style="display: inline-flex; align-items: center; padding: 5px 10px;"
+                                    data-url="' . route('refundRequest', $row['id']) . '">
+                                    Refund To User
+                                </a>';
                     }
                 })
+
+                ->editColumn('return_status', function ($row) {
+                    $status = $row->return_status ?? '';
+
+                    if ($status === 'Refunded') {
+                        return "<span class='badge badge-dim bg-label-success'>{$status}</span>";
+                    } elseif ($status === 'Pending') {
+                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";
+                    } elseif ($status === 'Processing') {
+                        return "<span class='badge badge-dim bg-label-warning'>{$status}</span>";
+                    } elseif ($status === 'Canceled') {
+                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";
+                    } else {
+                        return "<span class='badge badge-dim bg-label-secondary'>{$status}</span>";
+                    }
+                })
+
                 ->editColumn('user_name', function ($row) {
                     return isset($row->order->user) ? $row->order->user->name . ' ' . $row->order->user->last_name : '';
                 })
@@ -82,7 +115,7 @@ class ReturnOrderController extends Controller
                 ->editColumn('order_id', function ($row) {
                     return '<a href="' . route('orders.show', $row['order_id']) . '"  target="_blank" class="order-details-link" data-order-id="' . $row->order_id . '">' . $row->order_id . '</a>';
                 })
-                ->rawColumns(['action', 'is_send_to_merchmake', 'user_name', 'user_email', 'order_id', 'refund'])
+                ->rawColumns(['action', 'is_send_to_merchmake', 'user_name', 'user_email', 'order_id', 'refund','return_status'])
                 ->make(true);
         }
 
@@ -258,7 +291,7 @@ class ReturnOrderController extends Controller
     public function refundRequest(Request $request, $id)
     {
 
-        return response()->json(['status' => 'success', 'table' => 'returnORderTable']);
+        // return response()->json(['status' => 'success', 'table' => 'returnORderTable']);
 
 
         try {

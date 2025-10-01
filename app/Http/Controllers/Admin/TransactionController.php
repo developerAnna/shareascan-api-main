@@ -26,7 +26,14 @@ class TransactionController extends Controller
                 })
 
                 ->editColumn('order_payment_status', function ($row) {
-                    return $row->order->payment_status ?? null;
+                    $status = $row->order->payment_status ?? '';
+                    if($status == 'Completed'){
+                        return "<span class='badge badge-dim bg-label-success'>{$status}</span>";
+                    }elseif($status == 'Refunded'){
+                        return "<span class='badge badge-dim bg-label-warning'>{$status}</span>";   
+                    }else{
+                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";   
+                    }
                 })
 
                 ->rawColumns(['merchmake_order_id', 'order_payment_status'])

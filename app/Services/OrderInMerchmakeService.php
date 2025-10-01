@@ -63,6 +63,7 @@ class OrderInMerchmakeService
         $mailData = [
             'title' => 'Order Placed',
             'order' => $order
+
         ];
 
         // Send the email

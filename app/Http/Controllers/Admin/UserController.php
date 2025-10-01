@@ -32,7 +32,7 @@ class UserController extends Controller
 
                 ->editColumn('email_verified_at', function ($row) {
                     if (is_null($row->email_verified_at)) {
-                        return '<span class="badge bg-label-secondary" text-capitalized="">No</span>';
+                        return '<span class="badge bg-label-danger" text-capitalized="">No</span>';
                     } else {
                         return '<span class="badge bg-label-success" text-capitalized="">Yes</span>';
                     }

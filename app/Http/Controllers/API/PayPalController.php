@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\API\BaseController;
 use PayPal\Exception\PayPalConnectionException;
 use App\Models\Transaction as ModelsTransaction;
+use App\Jobs\HandlePaypalSaleCompleted;
 
 class PayPalController extends BaseController
 {
@@ -432,9 +433,26 @@ class PayPalController extends BaseController
                         if ($order_details) {
                             $order_details->update(['payment_status' => 'Completed', 'status' => 1]);
 
-                            $merchMakeService = new OrderInMerchmakeService();
-                            $merchMakeService->handlePaymentSucceed($order_details);
+                            // Log the event
+                            Log::info('PAYMENT.SALE.COMPLETED received for order: '.$order_details->id);
+
+                            // Dispatch the job to the queue
+                            dispatch(new HandlePaypalSaleCompleted($order_details));
                         }
+
+                        // Always return 200 OK immediately to PayPal
+                        // return response()->json(['status' => 'success'], 200);    
+
+                        // case 'PAYMENT.SALE.COMPLETED':
+                        //     if ($order_details) {
+                        //         $order_details->update(['payment_status' => 'Completed', 'status' => 1]);
+
+                        //          // Dispatch to queue
+                        //         dispatch(new HandlePaypalSaleCompleted($order_details));
+
+                        //         // $merchMakeService = new OrderInMerchmakeService();
+                        //         // $merchMakeService->handlePaymentSucceed($order_details);
+                        //     }
                         break;
 
                     case 'PAYMENT.SALE.PENDING':
@@ -451,6 +469,7 @@ class PayPalController extends BaseController
 
                     case 'PAYMENT.SALE.REFUNDED':
                         if ($order_details) {
+                            Log::info('PAYMENT.SALE.REFUNDED received for order: '.$order_details->id);
                             $order_details->update(['payment_status' => 'Refunded']);
                             ReturnOrder::where('order_id', $order_id)->update(['return_status' => 'Refunded']);
 
@@ -484,7 +503,7 @@ class PayPalController extends BaseController
                 // return false;
             }
 
-            return response()->json(['success' => true, 'message' => 'Webhook processed',200]);
+            return response()->json(['success' => true, 'message' => 'Webhook processed'],200);
         } catch (\Exception $ex) {
             Log::info($ex->getMessage());
             Log::channel('paypal_webhook')->error('Error: ' . $ex->getMessage());

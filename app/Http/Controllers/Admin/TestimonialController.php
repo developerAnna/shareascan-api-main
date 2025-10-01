@@ -36,7 +36,7 @@ class TestimonialController extends Controller
                     if ($row->status == 1) {
                         return '<span class="badge bg-label-success" text-capitalized="">Active</span>';
                     } else {
-                        return '<span class="badge bg-label-secondary" text-capitalized="">Inactive</span>';
+                        return '<span class="badge bg-label-danger" text-capitalized="">Inactive</span>';
                     }
                 })
 
