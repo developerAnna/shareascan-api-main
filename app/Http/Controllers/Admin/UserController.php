@@ -22,7 +22,7 @@ class UserController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
-                    $btn = '<a href="' . route('users.show', $row['id']) . '" class="item-show text-body"><i class="bx bxs-show"></i></a>';
+                    $btn = '<a href="' . route('users.show', $row['id']) . '" class="btn rounded-pill btn-icon btn-outline-primary"><i class="bx bxs-show"></i></a>';
                     return $btn;
                 })
 

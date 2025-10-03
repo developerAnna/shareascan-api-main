@@ -47,8 +47,8 @@ class ReturnOrderController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
-                    $btn = '<a href="' . route('return-orders.show', $row['id']) . '" class="item-show text-body"><i class="bx bxs-show"></i></a>';
-                    $btn .= '<a href="' . route('return-orders.edit', $row['id']) . '" class="item-edit text-body"><i class="bx bxs-edit"></i></a>';
+                    $btn = '<a href="' . route('return-orders.show', $row['id']) . '" class="btn rounded-pill btn-icon btn-outline-primary me-1"><i class="bx bxs-show"></i></a>';
+                    $btn .= '<a href="' . route('return-orders.edit', $row['id']) . '" class="btn rounded-pill btn-icon btn-outline-primary"><i class="bx bxs-edit"></i></a>';
                     return $btn;
                 })
                 ->editColumn('is_send_to_merchmake', function ($row) {

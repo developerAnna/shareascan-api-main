@@ -29,8 +29,8 @@ class CategoryController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
-                    $btn = '<a href="' . route('category.edit', $row['id']) . '" class="item-edit text-body"><i class="bx bxs-edit"></i></a>';
-                    $btn .= '<a href="#" data-url="' . route('category.destroy', encrypt($row['id'])) . '" class="item-delete text-body item-delete"><i class="bx bxs-trash-alt"></i></a>';
+                    $btn = '<a href="' . route('category.edit', $row['id']) . '" class="btn rounded-pill btn-icon btn-outline-primary me-2"><i class="bx bxs-edit"></i></a>';
+                    $btn .= '<a href="#" data-url="' . route('category.destroy', encrypt($row['id'])) . '" class="btn rounded-pill btn-icon btn-outline-danger item-delete"><i class="bx bxs-trash-alt"></i></a>';
 
                     return $btn;
                 })

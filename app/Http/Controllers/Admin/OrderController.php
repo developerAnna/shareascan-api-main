@@ -29,10 +29,10 @@ class OrderController extends Controller
                         // Show restore button if soft deleted
                         $btn .= '<a href="#" data-url="' . route('orders.restore', encrypt($row['id'])) . '" class="item-restore text-body"><i class="bi bi-arrow-counterclockwise me-1"></i></a>';
                     } else {
-                        $btn .= '<a href="' . route('orders.show', $row['id']) . '" class="item-show text-body"><i class="bx bxs-show"></i></a>';
+                        $btn .= '<a href="' . route('orders.show', $row['id']) . '" class="btn rounded-pill btn-icon btn-outline-primary me-2"><i class="bx bxs-show"></i></a>';
 
                         // Show delete button if not soft deleted
-                        $btn .= '<a href="#" data-type="order" data-url="' . route('orders.destroy', encrypt($row['id'])) . '" class="item-delete text-body"><i class="bx bxs-trash-alt"></i></a>';
+                        $btn .= '<a href="#" data-type="order" data-url="' . route('orders.destroy', encrypt($row['id'])) . '" class="item-delete btn rounded-pill btn-icon btn-outline-danger"><i class="bx bxs-trash-alt"></i></a>';
                     }
                     return $btn;
                 })

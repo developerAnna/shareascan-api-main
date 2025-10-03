@@ -105,8 +105,11 @@
                                     id="user_id" readonly />
                             </div>
                             <div class="col-md-4"> <label for="status" class="form-label">Rating</label>
-                                <select class="form-select" name="star_count" id="star_count"
-                                    aria-label="Default select example" readonly>
+                             <input type="text" name="star_count" class="form-control"
+                                    value="{{ isset($review) ? $review->star_count : '' }}"
+                                    id="star_count" readonly />
+                                <!-- <select class="form-select" name="star_count" id="star_count"
+                                    aria-label="Default select example" disabled>
                                     <option value="1" @if (old('star_count', isset($review) ? $review->star_count : '') == 1) selected @endif> 1
                                     </option>
                                     <option value="2" @if (old('star_count', isset($review) ? $review->star_count : '') == 2) selected @endif> 2
@@ -120,7 +123,7 @@
                                 </select>
                                 @error('star_count')
                                     <div class="error-alert">{{ $message }}</div>
-                                @enderror
+                                @enderror -->
                             </div>
 
                             <div class="col-md-4"> <label for="status" class="form-label">Status</label>
@@ -140,7 +143,7 @@
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label class="form-label" for="question">Content</label>
-                                <textarea id="content" rows="5" name="content" class="form-control" placeholder="">{{ old('description', isset($review) ? $review->content : '') }}</textarea>
+                                <textarea readonly id="content" rows="5" name="content" class="form-control" placeholder="">{{ old('description', isset($review) ? $review->content : '') }}</textarea>
                                 @error('content')
                                     <div class="error-alert">{{ $message }}</div>
                                 @enderror
