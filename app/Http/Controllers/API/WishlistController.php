@@ -179,7 +179,7 @@ class WishlistController extends BaseController
     {
 
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
+            // 'user_id' => 'required',
             'product_id' => 'required',
         ]);
 

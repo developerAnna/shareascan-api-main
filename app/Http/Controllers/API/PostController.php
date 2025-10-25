@@ -343,6 +343,7 @@ class PostController extends Controller
                         'alt_text' => $mediaData['alt_text'] ?? null,
                         'caption' => $mediaData['caption'] ?? null,
                         'file_size' => 0,
+                        'mime_type' => $this->getMimeTypeFromUrl($mediaData['url']) ?? '',
                         'width' => null,
                         'height' => null,
                         'order' => $index,
@@ -376,6 +377,21 @@ class PostController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function getMimeTypeFromUrl($url)
+    {
+        $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
+
+        return match (strtolower($extension)) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'mp4' => 'video/mp4',
+            'mov' => 'video/quicktime',
+            default => 'application/octet-stream',
+        };
     }
 
 
@@ -642,10 +658,10 @@ class PostController extends Controller
 
         // Get top-level replies (parent_reply_id = null) for the post
         $replies = PostReply::with(['user', 'children'])  // 'children' now recursively loads all levels
-        ->where('post_id', $id)
-        ->whereNull('parent_reply_id')
-        ->orderBy('created_at', 'asc')
-        ->paginate($perPage, ['*'], 'page', $page);
+            ->where('post_id', $id)
+            ->whereNull('parent_reply_id')
+            ->orderBy('created_at', 'asc')
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'success' => true,
@@ -703,7 +719,6 @@ class PostController extends Controller
                 'message' => 'Reply posted successfully.',
                 'reply' => new PostReplyResource($reply),
             ], 201);
-
         } catch (Exception $e) {
             \Log::error('Failed to post reply: ' . $e->getMessage());
 

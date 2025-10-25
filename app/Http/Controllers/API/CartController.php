@@ -251,13 +251,81 @@ class CartController extends BaseController
     {
         if (Auth::check()) {
             $cart_items = Cart::where('user_id', Auth::id())->get();
-          
+
             if ($cart_items->count() > 0) {
                 // $cart_total = Cart::where('user_id', Auth::id())->sum('total');
                 $cart_total = Cart::where('user_id', Auth::id())
-                            ->selectRaw('SUM(total::numeric) as cart_total')
-                            ->value('cart_total');
+                    ->selectRaw('SUM(total::numeric) as cart_total')
+                    ->value('cart_total');
                 return $this->sendResponse(['car_items' => CartResource::collection($cart_items), 'cart_sub_total' => $cart_total], 'Cart retrieved successfully!');
+            } else {
+                return $this->sendResponse([], 'Cart is empty.');
+            }
+        } else {
+            return $this->sendError('error.', 'User not authenticated.');
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/get-cartitems-count",
+     *     operationId="getCartItemsCount",
+     *     tags={"Cart"},
+     *     summary="Get the total number of items in the user's cart (Require token)",
+     *     security={{"X-Access-Token": {}}},
+     *     description="Fetches the total quantity of items in the cart for the authenticated user.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cart item count retrieved successfully.",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="cart_items_count", type="integer", example=3)
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Cart items count retrieved successfully!")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request. The request is invalid.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Bad Request."),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized. User must be authenticated.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not authenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not Found. Resource could not be found.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Resource not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation Failed. Errors with the provided data.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation failed."),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getCartCount(Request $request)
+    {
+        if (Auth::check()) {
+            $cart_count = Cart::where('user_id', Auth::id())->sum('qty');
+
+            if ($cart_count > 0) {
+                return $this->sendResponse(['cart_items_count' => $cart_count], 'Cart items count retrieved successfully!');
             } else {
                 return $this->sendResponse([], 'Cart is empty.');
             }

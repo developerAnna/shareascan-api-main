@@ -20,7 +20,8 @@ class TestimonialController extends Controller
     {
         if ($request->ajax()) {
 
-            $data = Testimonial::orderBy('id', 'desc');
+            // $data = Testimonial::orderBy('id', 'desc');
+            $data = Testimonial::all();
 
             return Datatables::of($data)
                 ->addIndexColumn()
@@ -71,7 +72,6 @@ class TestimonialController extends Controller
                 return redirect()->route('testimonials.index')->with('success', 'Saved Successfully');
             }
         } catch (\Exception $e) {
-
             DB::rollback();
 
             Log::error('Testimonial creation failed: ' . $e->getMessage());

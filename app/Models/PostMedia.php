@@ -22,6 +22,7 @@ class PostMedia extends Model
         'width',
         'height',
         'order',
+        'mime_type',
         'is_processed', // for video processing
     ];
 
@@ -81,11 +82,11 @@ class PostMedia extends Model
     {
         $bytes = $this->file_size;
         $units = ['B', 'KB', 'MB', 'GB'];
-        
+
         for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
             $bytes /= 1024;
         }
-        
+
         return round($bytes, 2) . ' ' . $units[$i];
     }
 
@@ -94,10 +95,10 @@ class PostMedia extends Model
         if (!$this->duration) {
             return '';
         }
-        
+
         $minutes = floor($this->duration / 60);
         $seconds = $this->duration % 60;
-        
+
         return sprintf('%02d:%02d', $minutes, $seconds);
     }
 
@@ -107,18 +108,18 @@ class PostMedia extends Model
         if (!$size) {
             return $this->media_url;
         }
-        
+
         // Parse size parameter (e.g., "300x200")
         $dimensions = explode('x', $size);
         if (count($dimensions) === 2) {
             $width = $dimensions[0];
             $height = $dimensions[1];
-            
+
             // Append ImageKit transformation parameters
             $separator = str_contains($this->media_url, '?') ? '&' : '?';
             return $this->media_url . $separator . "tr=w-{$width},h-{$height},c-at_max,fo-auto";
         }
-        
+
         return $this->media_url;
     }
 
@@ -127,7 +128,7 @@ class PostMedia extends Model
         if ($this->thumbnail_url) {
             return $this->thumbnail_url;
         }
-        
+
         // Generate thumbnail URL using ImageKit transformations
         return $this->getOptimizedUrl($size);
     }

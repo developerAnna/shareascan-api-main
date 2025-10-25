@@ -102,7 +102,6 @@ class ShopPageController extends BaseController
             $searchTerm = $request->search_product_title;
             $get_products = searchProduct($searchTerm);
         } else if ($request->category_type && !empty($request->category_type)) {
-
             $category = trim($request->category_type);
             $selected_category = $category;
             if ($category == "new_arrival") {
