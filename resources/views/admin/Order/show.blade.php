@@ -1,5 +1,58 @@
 @extends('admin.layouts.common')
 @section('content')
+<style>
+    .order-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        background: #fff;
+        overflow: hidden;
+        margin-bottom: 20px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+    }
+
+    .order-card-header {
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 10px 15px;
+        font-weight: 600;
+    }
+
+    .order-card-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .order-card-table th {
+        text-align: left;
+        padding: 8px 12px;
+        font-weight: 600;
+        color: inherit;
+        width: 40%;
+        vertical-align: top;
+    }
+
+    .order-card-table td {
+        padding: 8px 12px;
+        vertical-align: top;
+    }
+
+    .order-section {
+        width: 50%;
+        vertical-align: top;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+
+</style>
     <h4 class="py-3 mb-4"><span class="text-muted fw-light">Order/</span>
         Show
     </h4>
@@ -12,12 +65,12 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="card mb-4">
-                                <div class="card-body">
+                            <div class="mb-4">
+                                <div class="">
                                     <!-- Two-column table for order/payment and shipping details -->
-                                    <table class="w-100" style="border-collapse: collapse; width: 100%;">
+                                    <!-- <table class="w-100" style="border-collapse: collapse; width: 100%;">
                                         <tr>
-                                            <!-- Left side: Order and Payment Details -->
+                        
                                             <td style="vertical-align: top; padding-right: 10px;">
                                                 <table style="border-collapse: collapse; width: 100%;">
                                                     <tr>
@@ -112,8 +165,92 @@
                                                 </table>
                                             </td>
                                         </tr>
-                                    </table>
+                                    </table> -->
 
+                                    <div class="order-card">
+                                        <table class="order-card-table">
+                                            <tr>
+                                                <!-- Left side: Order and Payment Details -->
+                                                <td class="order-section">
+                                                    <div class="order-card-header">Order & Payment Details</div>
+                                                    <table class="order-card-table">
+                                                        <tr>
+                                                            <th>Order ID:</th>
+                                                            <td>{{ $order->id }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Merchmake Order ID:</th>
+                                                            <td>{{ $order->merchmake_order_id }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Payment Method:</th>
+                                                            <td>{{ $order->payment_method }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Payment Status:</th>
+                                                            <td>
+                                                                @php
+                                                                    $status = $order->payment_status ?? '';
+                                                                    $badgeClass = 'bg-label-primary';
+                                                                    if ($status === 'Completed') $badgeClass = 'bg-label-success';
+                                                                    elseif ($status === 'Refunded') $badgeClass = 'bg-label-warning';
+                                                                @endphp
+                                                                <span class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Order Status:</th>
+                                                            <td>
+                                                                @php
+                                                                    $status = $order->order_status ?? '';
+                                                                    $badgeClass = 'bg-label-secondary';
+                                                                    if ($status === 'Completed') $badgeClass = 'bg-label-success';
+                                                                    elseif ($status === 'Pending') $badgeClass = 'bg-label-primary';
+                                                                    elseif (in_array($status, ['Cancelled','Refunded'])) $badgeClass = 'bg-label-danger';
+                                                                @endphp
+                                                                <span class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Note:</th>
+                                                            <td>{{ $order->note }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+
+                                                <!-- Right side: Shipping Address -->
+                                                <td class="order-section">
+                                                    <div class="order-card-header">Shipping Address</div>
+                                                    <table class="order-card-table">
+                                                        <tr>
+                                                            <th>Name:</th>
+                                                            <td>{{ $order->shippingAddress->first_name . ' ' . $order->shippingAddress->last_name }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Email:</th>
+                                                            <td>{{ $order->shippingAddress->email }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Phone:</th>
+                                                            <td>{{ $order->shippingAddress->phone }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Address Line 1:</th>
+                                                            <td>{{ $order->shippingAddress->address_1 }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Address Line 2:</th>
+                                                            <td>{{ $order->shippingAddress->address_2 }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Country Code:</th>
+                                                            <td>{{ $order->shippingAddress->country_code }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
 
                                     <div class="mb-3">
                                         <h6><strong>Order Items:</strong></h6>
@@ -141,23 +278,23 @@
                                                                 );
                                                             @endphp
                                                             <tr>
-                                                                <!-- Product Title -->
+                                                                
                                                                 <td>{{ $items->first()->product_title }}</td>
 
-                                                                <!-- Merchmake Product ID -->
+                                                               
                                                                 <td>{{ $items->first()->product_id }}</td>
 
-                                                                <!-- Product Images -->
+                                                             
                                                                 <td>
                                                                     <img src="{{ $image_url['image_url'] }}" width="100"
                                                                         alt="Product Image">
                                                                 </td>
 
-                                                                <!-- Variation -->
+                                                             
                                                                 <td>{{ $items->first()->variation_color }},
                                                                     {{ $items->first()->variation_size }}</td>
 
-                                                                <!-- QR Images -->
+                                                            
                                                                 <td>
                                                                     <div class="d-flex flex-wrap">
                                                                         @foreach ($items as $key => $item)
@@ -176,16 +313,15 @@
                                                                     </div>
                                                                 </td>
 
-                                                                <!-- Quantity -->
+                                                        
                                                                 <td>{{ $items->sum('qty') }}</td>
 
-                                                                <!-- Price -->
                                                                 <td>${{ number_format($items->first()->price, 2) }}</td>
                                                                 <td>${{ number_format($items->sum('total'), 2) }}</td>
                                                             </tr>
                                                         @endforeach
 
-                                                        <!-- Row for Order Total -->
+                                                     
                                                         <tr>
                                                             <td colspan="7" class="text-right"><strong>Order
                                                                     Total:</strong></td>

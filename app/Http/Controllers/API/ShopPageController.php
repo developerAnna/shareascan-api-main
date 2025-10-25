@@ -116,6 +116,8 @@ class ShopPageController extends BaseController
             $selected_category = 'new_arrival';
         }
 
+        // dd($get_products);
+
         if ($request->color) {
             $get_products = getProductWithSelectedColor($get_products, $request->color);
         }

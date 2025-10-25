@@ -412,30 +412,27 @@ if (! function_exists('sortProducts')) {
     }
 }
 
-
 if (! function_exists('getProductWithSelectedColor')) {
     function getProductWithSelectedColor($products, $color)
     {
-        // Initialize an array to store the selected products
         $selected_color_products = [];
-
-        // Initialize an array to keep track of product IDs that have already been added
         $added_product_ids = [];
+
+        // Ensure $color is always an array
+        if (!is_array($color)) {
+            $color = [$color];
+        }
 
         if (!empty($products)) {
             foreach ($products as $product) {
-                if (isset($product['variations']) && !empty($product['variations'])) {
+                if (!empty($product['variations'])) {
                     foreach ($product['variations'] as $product_variation) {
-                        if (isset($product_variation['color_name']) && in_array($product_variation['color_name'], $color)) {
-                            // Check if the product has already been added using its unique identifier
+                        if (
+                            isset($product_variation['color_name']) &&
+                            in_array($product_variation['color_name'], $color) // ✅ Correct order
+                        ) {
                             if (isset($product['id']) && !in_array($product['id'], $added_product_ids)) {
-                                // Log the product (optional)
-                                Log::info($product);
-
-                                // Add the product to the selected array
                                 $selected_color_products[] = $product;
-
-                                // Add the product ID to the 'added' array to avoid duplicates
                                 $added_product_ids[] = $product['id'];
                             }
                         }
@@ -448,30 +445,67 @@ if (! function_exists('getProductWithSelectedColor')) {
     }
 }
 
+
+// if (! function_exists('getProductWithSelectedColor')) {
+//     function getProductWithSelectedColor($products, $color)
+//     {
+//         // Initialize an array to store the selected products
+//         $selected_color_products = [];
+
+//         // Initialize an array to keep track of product IDs that have already been added
+//         $added_product_ids = [];
+
+
+//         if (!empty($products)) {
+//             foreach ($products as $product) {
+//                 if (isset($product['variations']) && !empty($product['variations'])) {
+//                     foreach ($product['variations'] as $product_variation) {
+//                         // dd($color, $product_variation['color_name'],$product_variation);
+//                         // if (isset($product_variation['color_name']) && in_array($product_variation['color_name'], $color)) {
+//                         if (isset($product_variation['color_name']) && in_array($color,$product_variation['color_name'])) {
+//                             // Check if the product has already been added using its unique identifier
+//                             if (isset($product['id']) && !in_array($product['id'], $added_product_ids)) {
+//                                 // Log the product (optional)
+//                                 Log::info($product);
+
+//                                 // Add the product to the selected array
+//                                 $selected_color_products[] = $product;
+
+//                                 // Add the product ID to the 'added' array to avoid duplicates
+//                                 $added_product_ids[] = $product['id'];
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
+//         return $selected_color_products;
+//     }
+// }
+
 if (! function_exists('getProductWithSelectedSize')) {
     function getProductWithSelectedSize($products, $size)
     {
-        // Initialize an array to store the selected products
         $selected_size_products = [];
-
-        // Initialize an array to keep track of product IDs that have already been added
         $added_product_ids = [];
 
         if (!empty($products)) {
             foreach ($products as $product) {
                 if (isset($product['variations']) && !empty($product['variations'])) {
                     foreach ($product['variations'] as $product_variation) {
+                        // Debug check (remove after testing)
+                        // dd($size, $product_variation['size_name']);
 
-                        if (isset($product_variation['size_name']) && in_array($product_variation['size_name'], $size)) {
-                            // Check if the product has already been added using its unique identifier
+                        // Ensure $size is always an array
+                        $sizeArray = is_array($size) ? $size : [$size];
+
+                        if (
+                            isset($product_variation['size_name']) &&
+                            in_array($product_variation['size_name'], $sizeArray)
+                        ) {
                             if (isset($product['id']) && !in_array($product['id'], $added_product_ids)) {
-                                // Log the product (optional)
-                                // Log::info($product);
-
-                                // Add the product to the selected array
                                 $selected_size_products[] = $product;
-
-                                // Add the product ID to the 'added' array to avoid duplicates
                                 $added_product_ids[] = $product['id'];
                             }
                         }
