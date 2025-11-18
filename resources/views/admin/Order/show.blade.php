@@ -277,6 +277,7 @@
                                                                     null,
                                                                 );
                                                             @endphp
+                                                            
                                                             <tr>
                                                                 
                                                                 <td>{{ $items->first()->product_title }}</td>
@@ -286,7 +287,7 @@
 
                                                              
                                                                 <td>
-                                                                    <img src="{{ $image_url['image_url'] }}" width="100"
+                                                                    <img src="{{ isset($image_url['image_url']) ? $image_url['image_url'] : '' }}" width="100"
                                                                         alt="Product Image">
                                                                 </td>
 

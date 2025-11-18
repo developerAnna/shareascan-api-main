@@ -78,12 +78,41 @@ class AuthController extends BaseController
      * )
      */
 
+    // public function register(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'first_name' => 'required|unique:users,name',
+    //         'last_name' => 'required',
+    //         'email' => 'required|email|unique:users,email', // Unique validation for email
+    //         'password' => 'required|min:8',
+    //         'confirm_password' => 'required|same:password',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return $this->sendError('Validation Error.', $validator->errors(), 422);
+    //     }
+
+    //     $getAppName = env('APP_NAME');
+
+    //     $input = $request->all();
+    //     $input['password'] = bcrypt($input['password']);
+    //     $input['name'] = $request->first_name;
+    //     $user = User::create($input);
+
+    //     $user->notify(new VerifyEmailCustom());
+
+    //     $success['token'] = $user->createToken($getAppName)->plainTextToken;
+    //     $success['user'] = new UserResource($user);
+
+    //     return $this->sendResponse($success, 'User register successfully. Please check your email to verify.');
+    // }
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|unique:users,name',
             'last_name' => 'required',
-            'email' => 'required|email|unique:users,email', // Unique validation for email
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8',
             'confirm_password' => 'required|same:password',
         ]);
@@ -92,20 +121,40 @@ class AuthController extends BaseController
             return $this->sendError('Validation Error.', $validator->errors(), 422);
         }
 
-        $getAppName = env('APP_NAME');
+        try {
+            $getAppName = env('APP_NAME');
+            $input = $request->all();
+            $input['password'] = bcrypt($input['password']);
+            $input['name'] = $request->first_name;
 
-        $input = $request->all();
-        $input['password'] = bcrypt($input['password']);
-        $input['name'] = $request->first_name;
-        $user = User::create($input);
+            // Create user
+            $user = User::create($input);
 
-        $user->notify(new VerifyEmailCustom());
+            try {
+                // Send verification email
+                $user->notify(new VerifyEmailCustom());
+            } catch (\Exception $e) {
+                // If email notification fails, delete user
+                $user->delete();
+                return $this->sendError('Failed to send verification email. Please try again later.', $e->getMessage(), 500);
+            }
 
-        $success['token'] = $user->createToken($getAppName)->plainTextToken;
-        $success['user'] = new UserResource($user);
+            // Generate token and response
+            $success['token'] = $user->createToken($getAppName)->plainTextToken;
+            $success['user'] = new UserResource($user);
 
-        return $this->sendResponse($success, 'User register successfully. Please check your email to verify.');
+            return $this->sendResponse($success, 'User registered successfully. Please check your email to verify.');
+
+        } catch (\Exception $e) {
+            // Rollback if any unexpected error occurs
+            if (isset($user)) {
+                $user->delete();
+            }
+
+            return $this->sendError('Registration failed. Please try again later.', $e->getMessage(), 500);
+        }
     }
+
 
     /**
      * @OA\Post(
