@@ -46,6 +46,17 @@
                                             @endif>
                                             {{ $category['title'] }} > {{ $sub_category['title'] }}
                                             </option>
+                                            @if(isset($sub_category['sub_categories']) && !empty($sub_category['sub_categories']))
+                                                @foreach ($sub_category['sub_categories'] as $sub_sub_category)
+                                                    <!-- Sub-Subcategory option -->
+                                                    <option
+                                                        value="{{ $sub_sub_category['id'] }}|{{ $category['title'] }} > {{ $sub_category['title'] }} > {{ $sub_sub_category['title'] }}"
+                                                        @if (isset($db_category) && $db_category->category_id == $sub_sub_category['id'])
+                                                        selected  @endif>
+                                                            {{ $category['title'] }} > {{ $sub_category['title'] }} > {{ $sub_sub_category['title'] }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
                                         @endforeach
                                     @endif
                                 @endforeach

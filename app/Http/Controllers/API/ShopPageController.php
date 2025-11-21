@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Resources\ShopPageCategoryResource;
 
@@ -91,33 +92,134 @@ class ShopPageController extends BaseController
      */
 
 
+    // public function getShopPageData(Request $request)
+    // {
+    //     $categories = getShopPageCategories();
+
+    //     $get_products = null;
+    //     $selected_category = '';
+
+    //     if ($request->search_product_title && !empty($request->search_product_title)) {
+    //         $searchTerm = $request->search_product_title;
+    //         $get_products = searchProduct($searchTerm);
+    //     } else if ($request->category_type && !empty($request->category_type)) {
+    //         $category = trim($request->category_type);
+    //         $selected_category = $category;
+    //         if ($category == "new_arrival") {
+    //             $get_products = getNewArrivalProducts();
+    //         } elseif ($category == "bestseller") {
+    //             $get_products = getBestSellerProducts();
+    //         } else {
+    //             $get_products = getProductsFromCategoryId($category);
+    //         }
+    //     } else {
+    //         $get_products = getNewArrivalProducts();
+    //         $selected_category = 'new_arrival';
+    //     }
+
+    //     // dd($get_products);
+
+    //     if ($request->color) {
+    //         $get_products = getProductWithSelectedColor($get_products, $request->color);
+    //     }
+
+    //     if ($request->size) {
+    //         $get_products = getProductWithSelectedSize($get_products, $request->size);
+    //     }
+
+    //     if ($request->sorting && !empty($request->sorting)) {
+    //         $get_products = sortProducts($get_products, $request->sorting);
+    //     }
+
+    //     $product_variations = getVariations($get_products);
+
+    //     $get_products = paginateArray($get_products, 16);
+
+    //     if (!empty($get_products)) {
+    //         return $this->sendResponse([
+    //             'categories' => ShopPageCategoryResource::collection($categories),
+    //             'selected_category' => $selected_category,
+    //             'products' => $get_products,
+    //             'colorArr' => $product_variations['color_array'] ?? [],
+    //             'sizeArr' => $product_variations['size_array'] ?? [],
+    //         ], 'Data Fetched Successfully!');
+    //     } else {
+    //         return $this->sendError('No Products');
+    //     }
+    // }
+
     public function getShopPageData(Request $request)
     {
-        $categories = getShopPageCategories();
+        /**
+         * 1. Cache shop categories (always safe to cache)
+         */
+        $categories = Cache::remember('shop_page_categories_data', now()->addHour(1), function () {
+            return getShopPageCategories();
+        });
 
-        $get_products = null;
         $selected_category = '';
+        $get_products = [];
 
-        if ($request->search_product_title && !empty($request->search_product_title)) {
+        /**
+         * 2. Detect if filter/search/sort is used → NO CACHE
+         */
+        $hasFilters =
+            $request->search_product_title ||
+            $request->color ||
+            $request->size ||
+            $request->sorting;
+
+        /**
+         * 3. SEARCH → never use cache
+         */
+        if ($request->search_product_title) {
             $searchTerm = $request->search_product_title;
             $get_products = searchProduct($searchTerm);
-        } else if ($request->category_type && !empty($request->category_type)) {
-            $category = trim($request->category_type);
-            $selected_category = $category;
-            if ($category == "new_arrival") {
-                $get_products = getNewArrivalProducts();
-            } elseif ($category == "bestseller") {
-                $get_products = getBestSellerProducts();
-            } else {
-                $get_products = getProductsFromCategoryId($category);
-            }
-        } else {
-            $get_products = getNewArrivalProducts();
-            $selected_category = 'new_arrival';
         }
 
-        // dd($get_products);
+        /**
+         * 4. CATEGORY FILTER → use cache only for default categories
+         */
+        else if ($request->category_type) {
 
+            $category = trim($request->category_type);
+            $selected_category = $category;
+
+            // NEW ARRIVALS (cached)
+            if ($category == "new_arrival") {
+                $get_products = Cache::remember('new_arrival_products_data', now()->addHour(1), function () {
+                    return getNewArrivalProducts();
+                });
+            }
+
+            // BEST SELLERS (cached)
+            elseif ($category == "bestseller") {
+                $get_products = Cache::remember('bestseller_products_data', now()->addHour(1), function () {
+                    return getBestSellerProducts();
+                });
+            }
+
+            // NORMAL CATEGORY (no cache)
+            else {
+                $get_products = getProductsFromCategoryId($category);
+            }
+        }
+
+        /**
+         * 5. DEFAULT page load → new_arrival (cached)
+         */
+        else {
+            $selected_category = 'new_arrival';
+
+            $get_products = Cache::remember('new_arrival_products_data', now()->addHour(1), function () {
+                return getNewArrivalProducts();
+            });
+        }
+
+        /**
+         * 6. Apply optional filters (color, size, sorting)
+         * NO caching here — filters must show live results
+         */
         if ($request->color) {
             $get_products = getProductWithSelectedColor($get_products, $request->color);
         }
@@ -126,26 +228,32 @@ class ShopPageController extends BaseController
             $get_products = getProductWithSelectedSize($get_products, $request->size);
         }
 
-        if ($request->sorting && !empty($request->sorting)) {
+        if ($request->sorting) {
             $get_products = sortProducts($get_products, $request->sorting);
         }
 
+        /**
+         * 7. Product variations + pagination
+         */
         $product_variations = getVariations($get_products);
-
         $get_products = paginateArray($get_products, 16);
 
+        /**
+         * 8. Return response
+         */
         if (!empty($get_products)) {
             return $this->sendResponse([
                 'categories' => ShopPageCategoryResource::collection($categories),
                 'selected_category' => $selected_category,
-                'products' => $get_products,
-                'colorArr' => $product_variations['color_array'] ?? [],
-                'sizeArr' => $product_variations['size_array'] ?? [],
+                'products'         => $get_products,
+                'colorArr'         => $product_variations['color_array'] ?? [],
+                'sizeArr'          => $product_variations['size_array'] ?? [],
             ], 'Data Fetched Successfully!');
         } else {
             return $this->sendError('No Products');
         }
     }
+
 
     /**
      * @OA\Get(

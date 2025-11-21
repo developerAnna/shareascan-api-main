@@ -34,11 +34,24 @@ if (!function_exists('get_options')) {
     }
 }
 
+// if (!function_exists('get_category_title')) {
+//     function get_category_title($title)
+//     {
+//         $category_title_data = explode('>', $title);
+//         $category_title = isset($category_title_data[1]) ? $category_title_data[1] : $category_title_data[0];
+//         return $category_title;
+//     }
+// }
+
 if (!function_exists('get_category_title')) {
     function get_category_title($title)
     {
+        // Split the category string by '>'
         $category_title_data = explode('>', $title);
-        $category_title = isset($category_title_data[1]) ? $category_title_data[1] : $category_title_data[0];
+        
+        // Get the last element in the array (which is the last category)
+        $category_title = trim(end($category_title_data));
+        
         return $category_title;
     }
 }
@@ -523,7 +536,11 @@ if (! function_exists('searchProduct')) {
     function searchProduct($search_text)
     {
         $merchMake = new MerchMake();
-        $merchmake_products = $merchMake->getProducts();
+        // $merchmake_products = $merchMake->getProducts();
+        $merchmake_products = Cache::remember('merchmake_all_products', now()->addHour(1), function () {
+            $merchMake = new MerchMake();
+            return $merchMake->getProducts();
+        });
 
         $search_products = [];
         if (!empty($merchmake_products)) {
