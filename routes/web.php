@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DesignController;
 use App\Http\Controllers\Admin\MyProfileController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Admin\EmailTemplateController;
@@ -102,6 +103,8 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
 
     // testimonial
     Route::resource('testimonials', TestimonialController::class);
+
+    Route::resource('designs', DesignController::class);
 });
 
 

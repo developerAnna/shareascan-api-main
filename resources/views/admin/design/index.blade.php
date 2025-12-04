@@ -1,0 +1,73 @@
+@extends('admin.layouts.common')
+@section('content')
+    <div class="row">
+        <div class="col-md-6">
+            <h4 class="py-3 mb-4">
+                <span class="text-muted fw-light">Design /</span> List
+            </h4>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ route('designs.create') }}" class="btn btn-primary">Add Design</a>
+        </div>
+    </div>
+    <div id="flash-messages">
+        <x-success-message />
+
+
+
+    </div>
+    <!-- Ajax Sourced Server-side -->
+    <div class="card">
+        <h5 class="card-header">Design List</h5>
+        <div class="card-body">
+            <table class="datatables-ajax table table-bordered" id="designTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Image</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @push('scripts')
+        <script src="{{ asset('admin/assets/js/delete-records.js') }}"></script>
+
+        <script>
+            $(document).ready(function() {
+
+                var table = $('#designTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: "{{ route('designs.index') }}",
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false
+                        },
+                        {
+                            data: 'image_name',
+                            name: 'image_name'
+                        },
+                        {
+                            data: 'image',
+                            name: 'image'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        },
+                    ]
+                });
+
+            });
+        </script>
+    @endpush
+@endsection

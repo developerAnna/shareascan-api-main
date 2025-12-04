@@ -79,6 +79,14 @@
              </a>
          </li>
 
+         <li class="menu-item">
+             <a href="{{ route('designs.index') }}" class="menu-link">
+                 <i class='menu-icon tf-icons bx bx-brush'></i>
+                 <div data-i18n="Dashboards">Designs</div>
+             </a>
+         </li>
+
+
 
          <li class="menu-item">
              <a href="javascript:void(0);" class="menu-link menu-toggle">

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\API\BaseController;
 use App\Models\Qrcodes;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx\Rels;
+use App\Models\Desing;
 
 class CartController extends BaseController
 {
@@ -99,6 +100,7 @@ class CartController extends BaseController
             'product_variation_id' => 'required',
             'art_files' => 'required|array', // Ensure art_files is an array
             'art_files.*' => 'required|distinct',
+            'design_id' => 'nullable|exists:designs,id',
         ]);
 
         if ($validator->fails()) {
@@ -170,6 +172,79 @@ class CartController extends BaseController
                         'qrcode_id' => $qrcode_id,
                         'position' => $key
                     ]);
+                }
+
+                try {
+
+                    if ($request->design_id) {
+
+                        $design = Desing::find($request->design_id);
+                        if (!$design) {
+                            return response()->json(['success' => false, 'message' => 'Design not found'], 404);
+                        }
+
+                        $basePath = storage_path('app/public/DesignImages/' . $design->image_name);
+                        if (!file_exists($basePath)) {
+                            return response()->json(['success' => false, 'message' => 'Base design image missing'], 500);
+                        }
+
+                        $base = imagecreatefromstring(file_get_contents($basePath));
+
+                        foreach ($request['art_files'] as $key => $qrId) {
+
+                            $qr = Qrcodes::find($qrId);
+                            if (!$qr || !$qr->image_name) {
+                                return response()->json(['success' => false, 'message' => "QR (#$qrId) image not found"], 404);
+                            }
+
+                            $qrPath = storage_path('app/public/QrImages/' . $qr->image_name);
+                            if (!file_exists($qrPath)) {
+                                return response()->json(['success' => false, 'message' => "QR image missing (#$qrId)"], 500);
+                            }
+
+                            $qrimg = imagecreatefromstring(file_get_contents($qrPath));
+
+                            // Auto detect QR image dimensions
+                            $targetW = imagesx($qrimg);
+                            $targetH = imagesy($qrimg);
+
+                            // Decide position using design table
+                            $posX = $design->{"x_axis_" . $key} ?? $design->x_axis;
+                            $posY = $design->{"y_axis_" . $key} ?? $design->y_axis;
+
+                            // Merge QR without resizing
+                            imagecopy($base, $qrimg, $posX, $posY, 0, 0, $targetW, $targetH);
+
+                            imagedestroy($qrimg);
+                        }
+
+                        // Save final image
+                        $folder = storage_path('app/public/CartDesign/');
+                        if (!file_exists($folder)) mkdir($folder, 0777, true);
+
+                        $finalName = 'cart_design_' . time() . '.png';
+                        $finalPath = $folder . $finalName;
+                        imagepng($base, $finalPath, 6);
+                        imagedestroy($base);
+
+                        $cart->cartDesign()->create([
+                            'design_id' => $design->id,
+                            'image'     => $finalName
+                        ]);
+                    }
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Cart created successfully',
+                        'total_items' => $cart->cartItmesQrCodes->count(),
+                        'design_applied' => $request->design_id ? true : false
+                    ], 200);
+                } catch (\Throwable $e) {
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => $e->getMessage()
+                    ], 500);
                 }
             } else {
                 return $this->sendError('error.', 'Product not found in merchmake.');

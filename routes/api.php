@@ -151,6 +151,7 @@ Route::middleware(['access-token', 'auth:sanctum'])->group(function () {
         Route::get('/get-qrcode-content/{order_item_id}', [QrCodeController::class, 'getQrCodeContent']);
         Route::post('/update-qrcode-content', [QrCodeController::class, 'updateQrcodeContent']);
         Route::post('/active-deactivate-qr', [QrCodeController::class, 'deactivateQR']);
+        Route::get('/get-designs', [QrCodeController::class, 'getDesigns']);
 
         // Post routes
         Route::get('/posts', [App\Http\Controllers\API\PostController::class, 'index']);

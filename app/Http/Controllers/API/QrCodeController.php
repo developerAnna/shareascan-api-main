@@ -13,6 +13,8 @@ use App\Http\Resources\QrcodesResurce;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\API\BaseController;
+use App\Http\Resources\DesignResource;
+use App\Models\Desing;
 
 class QrCodeController extends BaseController
 {
@@ -371,6 +373,55 @@ class QrCodeController extends BaseController
             DB::rollBack();
             Log::error('Error in adding the product into recently view: ' . $e->getMessage());
             return $this->sendError('error.', 'Failed to add the product into recently view.');
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/get-designs",
+     *     summary="Get all saved designs",
+     *     description="This API fetches the list of all uploaded designs along with their image URLs.",
+     *     tags={"Designs"},
+     *     security={{"X-Access-Token": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Designs fetched successfully.",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Designs Fetched Successfully!"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="image_name", type="string", example="1733389000_logo.png"),
+     *                     @OA\Property(property="image_url", type="string", example="https://your-domain.com/storage/DesignImages/1733389000_logo.png"),
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error.",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Failed to fetch designs. Please try again.")
+     *         )
+     *     )
+     * )
+     */
+
+
+    public function getDesigns(Request $request)
+    {
+        try {
+            $designs = Desing::get();
+            return $this->sendResponse(DesignResource::collection($designs), 'Designs Fetched Successfully!');
+        } catch (\Exception $e) {
+            Log::error('Error while fetching designs: ' . $e->getMessage());
+            return $this->sendError('error.', 'Failed to fetch designs. Please try again.');
         }
     }
 }
