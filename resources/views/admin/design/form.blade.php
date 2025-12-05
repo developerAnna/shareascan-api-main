@@ -38,7 +38,8 @@
 
                         <div class="mb-3">
                             <label class="form-label" for="x_axis">X Axis Value</label>
-                            <input id="x_axis" type="text" name="x_axis" class="form-control" placeholder="" value="{{ isset($design) ? $design->x_axis : '' }}">
+                            <input id="x_axis" type="text" name="x_axis" class="form-control" placeholder=""
+                                value="{{ isset($design) ? $design->x_axis : '' }}">
                             @error('x_axis')
                                 <div class="error-alert">{{ $message }}</div>
                             @enderror
@@ -46,8 +47,36 @@
 
                         <div class="mb-3">
                             <label class="form-label" for="y_axis">Y Axis Value</label>
-                            <input id="y_axis" type="text" name="y_axis" class="form-control" placeholder="" value="{{ isset($design) ? $design->y_axis : '' }}">
+                            <input id="y_axis" type="text" name="y_axis" class="form-control" placeholder=""
+                                value="{{ isset($design) ? $design->y_axis : '' }}">
                             @error('y_axis')
+                                <div class="error-alert">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="target_width">Target Width</label>
+                            <input id="target_width" type="text" name="target_width" class="form-control" placeholder=""
+                                value="{{ isset($design) ? $design->target_width : '' }}">
+                            @error('target_width')
+                                <div class="error-alert">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="y_axis">Target Height</label>
+                            <input id="target_height" type="text" name="target_height" class="form-control"
+                                placeholder="" value="{{ isset($design) ? $design->target_height : '' }}">
+                            @error('target_height')
+                                <div class="error-alert">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="y_axis">Rotation</label>
+                            <input id="rotation" type="text" name="rotation" class="form-control"
+                                placeholder="" value="{{ isset($design) ? $design->rotation : '' }}">
+                            @error('rotation')
                                 <div class="error-alert">{{ $message }}</div>
                             @enderror
                         </div>

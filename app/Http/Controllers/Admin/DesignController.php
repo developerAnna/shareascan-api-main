@@ -78,6 +78,10 @@ class DesignController extends Controller
                 'image_path'    => $imagePath,
                 'x_axis'        => $request->x_axis ?? null,
                 'y_axis'        => $request->y_axis ?? null,
+                'target_width'        => $request->target_width ?? null,
+                'target_height'        => $request->target_height ?? null,
+                'rotation'        => $request->rotation ?? null,
+
             ]);
 
             DB::commit();
@@ -150,6 +154,9 @@ class DesignController extends Controller
                 'image_path' => $imagePath,
                 'x_axis'     => $request->x_axis ?? null,
                 'y_axis'     => $request->y_axis ?? null,
+                'target_width'        => $request->target_width ?? null,
+                'target_height'        => $request->target_height ?? null,
+                'rotation'        => $request->rotation ?? null,
             ]);
 
             DB::commit();

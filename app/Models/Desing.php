@@ -11,5 +11,8 @@ class Desing extends Model
         'image_path',
         'x_axis',
         'y_axis',
+        'target_width',
+        'target_height',
+        'rotation'
     ];
 }

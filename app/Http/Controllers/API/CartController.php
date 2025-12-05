@@ -100,7 +100,7 @@ class CartController extends BaseController
             'product_variation_id' => 'required',
             'art_files' => 'required|array', // Ensure art_files is an array
             'art_files.*' => 'required|distinct',
-            'design_id' => 'nullable|exists:designs,id',
+            'design_id' => 'nullable|exists:desings,id',
         ]);
 
         if ($validator->fails()) {
@@ -154,31 +154,32 @@ class CartController extends BaseController
                 }
 
                 // Now that all validations are passed, create the cart
-                $cart = Cart::create([
-                    'user_id' => Auth::user()->id,
-                    'product_id' => $request->product_id,
-                    'qty' => $request->qty,
-                    'price' => $price,
-                    'total' => $price * $request->qty,
-                    'product_variation_id' => $request->product_variation_id,
-                    'product_title' => $merchmake_product['title'],
-                    'variation_color' => $color,
-                    'variation_size' => $size,
-                ]);
+                // $cart = Cart::create([
+                //     'user_id' => Auth::user()->id,
+                //     'product_id' => $request->product_id,
+                //     'qty' => $request->qty,
+                //     'price' => $price,
+                //     'total' => $price * $request->qty,
+                //     'product_variation_id' => $request->product_variation_id,
+                //     'product_title' => $merchmake_product['title'],
+                //     'variation_color' => $color,
+                //     'variation_size' => $size,
+                // ]);
 
-                // Add art files to cart if present
-                foreach ($request['art_files'] as $key => $qrcode_id) {
-                    $cart->cartItmesQrCodes()->create([
-                        'qrcode_id' => $qrcode_id,
-                        'position' => $key
-                    ]);
-                }
+                // // Add art files to cart if present
+                // foreach ($request['art_files'] as $key => $qrcode_id) {
+                //     $cart->cartItmesQrCodes()->create([
+                //         'qrcode_id' => $qrcode_id,
+                //         'position' => $key
+                //     ]);
+                // }
 
                 try {
 
                     if ($request->design_id) {
 
                         $design = Desing::find($request->design_id);
+
                         if (!$design) {
                             return response()->json(['success' => false, 'message' => 'Design not found'], 404);
                         }
@@ -193,33 +194,85 @@ class CartController extends BaseController
                         foreach ($request['art_files'] as $key => $qrId) {
 
                             $qr = Qrcodes::find($qrId);
-                            if (!$qr || !$qr->image_name) {
+
+                            if (!$qr || !$qr->qr_image) {
                                 return response()->json(['success' => false, 'message' => "QR (#$qrId) image not found"], 404);
                             }
 
-                            $qrPath = storage_path('app/public/QrImages/' . $qr->image_name);
-                            if (!file_exists($qrPath)) {
+                            $qrFilePath = public_path('storage/' . $qr->qr_image_path);
+
+                            if (!file_exists($qrFilePath)) {
                                 return response()->json(['success' => false, 'message' => "QR image missing (#$qrId)"], 500);
                             }
 
-                            $qrimg = imagecreatefromstring(file_get_contents($qrPath));
 
-                            // Auto detect QR image dimensions
-                            $targetW = imagesx($qrimg);
-                            $targetH = imagesy($qrimg);
+                            $qrimg = imagecreatefromstring(file_get_contents($qrFilePath));
 
-                            // Decide position using design table
-                            $posX = $design->{"x_axis_" . $key} ?? $design->x_axis;
-                            $posY = $design->{"y_axis_" . $key} ?? $design->y_axis;
 
-                            // Merge QR without resizing
-                            imagecopy($base, $qrimg, $posX, $posY, 0, 0, $targetW, $targetH);
 
+                            // Enable transparency on base image
+                            imagealphablending($base, true);
+                            imagesavealpha($base, true);
+
+                            $targetW = $design->target_width ?? 340;
+                            $targetH = $design->target_height ?? 340;
+
+                            // $targetW = 250;
+                            // $targetH = 250;
+
+                            // // Resize before merging  (same as working code)
+                            $qrResized = imagescale($qrimg, $targetW, $targetH, IMG_BILINEAR_FIXED);
+
+                            // $posX =  intval($design->x_axis);
+                            // $posY =  intval($design->y_axis);
+
+                            // $posX =  500;
+                            // $posY =  1200;
+                            $rotation =  0;
+
+                            // // Rotate
+                            // $qrRotated = imagerotate($qrResized, -$rotation, 0);
+                            // imagealphablending($qrRotated, true);
+                            // imagesavealpha($qrRotated, true);
+
+                            // // Merge resized QR
+                            // imagecopy($base, $qrResized, $posX, $posY, 0, 0, $targetW, $targetH);
+
+                            // // Cleanup memory
+                            // imagedestroy($qrimg);
+                            // imagedestroy($qrResized);
+
+                            // Positions from DB or static
+                            // $posX = 460;
+                            // $posY = 430;// up down
+                            // $rotation = $design->rotation ?? 20;   // OR static: 0 if you want
+
+                            // --- SMART CONDITION ---
+                            if ($rotation != 0) {
+
+                                // Create transparent color
+                                $transparent = imagecolorallocatealpha($qrResized, 0, 0, 0, 127);
+
+                                // Rotate with transparent background
+                                $qrRotated = imagerotate($qrResized, -$rotation, $transparent);
+
+                                // Preserve alpha
+                                imagealphablending($qrRotated, false);
+                                imagesavealpha($qrRotated, true);
+
+                                imagecopy($base, $qrRotated, $posX, $posY, 0, 0, imagesx($qrRotated), imagesy($qrRotated));
+                                imagedestroy($qrRotated);
+                            } else {
+                                imagecopy($base, $qrResized, $posX, $posY, 0, 0, $targetW, $targetH);
+                            }
+
+                            // Cleanup
                             imagedestroy($qrimg);
+                            imagedestroy($qrResized);
                         }
 
                         // Save final image
-                        $folder = storage_path('app/public/CartDesign/');
+                        $folder = storage_path('app/public/CartDesignImages/');
                         if (!file_exists($folder)) mkdir($folder, 0777, true);
 
                         $finalName = 'cart_design_' . time() . '.png';
@@ -227,16 +280,16 @@ class CartController extends BaseController
                         imagepng($base, $finalPath, 6);
                         imagedestroy($base);
 
-                        $cart->cartDesign()->create([
-                            'design_id' => $design->id,
-                            'image'     => $finalName
-                        ]);
+                        // $cart->cartDesign()->create([
+                        //     'design_id' => $design->id,
+                        //     'image'     => $finalName
+                        // ]);
                     }
 
                     return response()->json([
                         'success' => true,
                         'message' => 'Cart created successfully',
-                        'total_items' => $cart->cartItmesQrCodes->count(),
+                        // 'total_items' => $cart->cartItmesQrCodes->count(),
                         'design_applied' => $request->design_id ? true : false
                     ], 200);
                 } catch (\Throwable $e) {

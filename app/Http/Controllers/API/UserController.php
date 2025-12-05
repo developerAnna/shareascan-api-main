@@ -191,9 +191,9 @@ class UserController extends BaseController
     {
 
         try {
-            if ($id != Auth::user()->id) {
-                return $this->sendError('Invalid User ID.', [], 422);
-            }
+            // if ($id != Auth::user()->id) {
+            //     return $this->sendError('Invalid User ID.', [], 422);
+            // }
 
             $user = User::with('user_details')->where('id', Auth::user()->id)->first();
 
