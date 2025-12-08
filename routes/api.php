@@ -122,6 +122,7 @@ Route::middleware(['access-token', 'auth:sanctum'])->group(function () {
         Route::delete('/remove-cart-item/{id}', [CartController::class, 'removeCartItem']);
         Route::post('/update-cart', [CartController::class, 'updateCart']);
         Route::get('/get-cartitems-count', [CartController::class, 'getCartCount']);
+        Route::post('/desing-with-qrimage', [CartController::class, 'generateNewDesingWithQR']);
 
         Route::get('/checkout', [CheckoutController::class, 'checkout']);
 

@@ -48,10 +48,10 @@ if (!function_exists('get_category_title')) {
     {
         // Split the category string by '>'
         $category_title_data = explode('>', $title);
-        
+
         // Get the last element in the array (which is the last category)
         $category_title = trim(end($category_title_data));
-        
+
         return $category_title;
     }
 }
@@ -945,3 +945,63 @@ if (! function_exists('getProductTitle')) {
         return $title;
     }
 }
+
+function removeWhiteBackground($img)
+{
+    $w = imagesx($img);
+    $h = imagesy($img);
+
+    imagealphablending($img, false);
+    imagesavealpha($img, true);
+
+    for ($x = 0; $x < $w; $x++) {
+        for ($y = 0; $y < $h; $y++) {
+            $rgba = imagecolorat($img, $x, $y);
+            $colors = imagecolorsforindex($img, $rgba);
+
+            if ($colors['red'] > 240 && $colors['green'] > 240 && $colors['blue'] > 240) {
+                $transparent = imagecolorallocatealpha($img, 0, 0, 0, 127);
+                imagesetpixel($img, $x, $y, $transparent);
+            }
+        }
+    }
+
+    return $img;
+}
+
+function resizeWithTransparency($sourcePath, $targetW, $targetH)
+{
+    if (!file_exists($sourcePath)) return false;
+
+    $srcImg = imagecreatefromstring(file_get_contents($sourcePath));
+    if (!$srcImg) return false;
+
+    $srcW = imagesx($srcImg);
+    $srcH = imagesy($srcImg);
+
+    $dstImg = imagecreatetruecolor($targetW, $targetH);
+    imagealphablending($dstImg, false);
+    imagesavealpha($dstImg, true);
+
+    $transparent = imagecolorallocatealpha($dstImg, 0, 0, 0, 127);
+    imagefill($dstImg, 0, 0, $transparent);
+
+    imagecopyresampled($dstImg, $srcImg, 0, 0, 0, 0, $targetW, $targetH, $srcW, $srcH);
+
+    // Remove white background
+    $w = imagesx($dstImg);
+    $h = imagesy($dstImg);
+    for ($x = 0; $x < $w; $x++) {
+        for ($y = 0; $y < $h; $y++) {
+            $rgba = imagecolorat($dstImg, $x, $y);
+            $colors = imagecolorsforindex($dstImg, $rgba);
+            if ($colors['red'] > 240 && $colors['green'] > 240 && $colors['blue'] > 240) {
+                imagesetpixel($dstImg, $x, $y, $transparent);
+            }
+        }
+    }
+
+    imagedestroy($srcImg);
+    return $dstImg;
+}
+
