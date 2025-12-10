@@ -28,11 +28,26 @@ class CartResource extends JsonResource
             'variation_color' => $this->variation_color,
             'variation_size' => $this->variation_size,
             'art_files' => $this->cartItmesQrCodes ? $this->cartItmesQrCodes->map(function ($cartQr) {
+
+                $design = $cartQr->design;
+
                 return [
                     'cart_id' => $cartQr->cart_id,
+
+                    // QR CODE DATA
                     'qrcode_id' => $cartQr->qrcode_id,
                     'qrcode_image' => $cartQr->qrcode->qr_image,
                     'qrcode_image_url' => asset('storage/' . $cartQr->qrcode->qr_image_path),
+
+                    // DESIGN DATA
+                    'design_id' => $cartQr->design_id,
+                    'design_image_name' => $design ? $design->image_name : null,
+                    'design_image_path' => $design ? $design->image_path : null,
+                    'design_image_url' => $design ? asset('storage/' . $design->image_path) : null,
+
+                    'qr_with_desing_final_image' => $cartQr ? asset('storage/' . $cartQr->desing_with_qr) : null,
+
+                    // BACK / FRONT POSITION
                     'position' => $cartQr->position,
                 ];
             }) : [],

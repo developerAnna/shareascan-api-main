@@ -26,47 +26,79 @@ class CartController extends BaseController
      *     operationId="addCart",
      *     tags={"Cart"},
      *     summary="Add product to cart (Requires token)",
-     *     description="Add a product and its variation to the cart, including validation for art files.",
+     *     description="Add a product with variation and optional art files (QR + Design).",
      *     security={{"X-Access-Token": {}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             @OA\Property(property="user_id", type="integer", example=1, description="ID of the user."),
-     *             @OA\Property(property="product_id", type="integer", example=101, description="ID of the product."),
-     *             @OA\Property(property="product_variation_id", type="integer", example=202, description="ID of the product variation."),
-     *             @OA\Property(property="qty", type="integer", example=2, description="Quantity of the product to add."),
-     *             @OA\Property(property="price", type="number", format="float", example=99.99, description="Price of the product."),
-     *             @OA\Property(property="art_files", type="object", description="Object of art file positions as keys and QR code IDs as values.",
-     *                 @OA\Property(property="Front", type="integer", example=501, description="ID of the QR code for the 'Front' position."),
-     *                 @OA\Property(property="Back", type="integer", example=502, description="ID of the QR code for the 'Back' position.")
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="product_id", type="integer", example=20716),
+     *             @OA\Property(property="product_variation_id", type="integer", example=251295),
+     *             @OA\Property(property="qty", type="integer", example=1),
+     *             @OA\Property(property="price", type="number", format="float", example=53.95),
+     *
+     *             @OA\Property(
+     *                 property="art_files",
+     *                 type="object",
+     *                 description="Each key (Front/Back/etc.) contains qr_id and design_id.",
+     *                 @OA\Property(
+     *                     property="Back",
+     *                     type="object",
+     *                     @OA\Property(property="qr_id", type="integer", example=16, description="QR Code ID"),
+     *                     @OA\Property(property="design_id", type="integer", example=20, description="Design ID")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="Front",
+     *                     type="object",
+     *                     @OA\Property(property="qr_id", type="integer", example=15, description="QR Code ID"),
+     *                     @OA\Property(property="design_id", type="integer", example=18, description="Design ID")
+     *                 )
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
-     *         description="Product added to cart successfully.",
+     *         description="Product added to cart successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="id", type="integer", example=1, description="Cart entry ID."),
-     *                 @OA\Property(property="user_id", type="integer", example=1, description="ID of the user."),
-     *                 @OA\Property(property="product_id", type="integer", example=101, description="ID of the product."),
-     *                 @OA\Property(property="qty", type="integer", example=2, description="Quantity of the product added."),
-     *                 @OA\Property(property="price", type="number", format="float", example=99.99, description="Price of the product."),
-     *                 @OA\Property(property="product_variation_id", type="integer", example=202, description="ID of the product variation."),
-     *                 @OA\Property(property="product_title", type="string", example="T-shirt", description="Title of the product."),
-     *                 @OA\Property(property="variation_color", type="string", example="Red", description="Color of the product variation."),
-     *                 @OA\Property(property="variation_size", type="string", example="M", description="Size of the product variation."),
-     *                 @OA\Property(property="art_files", type="object", description="List of art files and positions associated with the cart item.",
-     *                     @OA\Property(property="Front", type="integer", example=501, description="ID of the associated QR code for the 'Front' position."),
-     *                     @OA\Property(property="Back", type="integer", example=502, description="ID of the associated QR code for the 'Back' position.")
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="product_id", type="integer", example=20716),
+     *                 @OA\Property(property="qty", type="integer", example=1),
+     *                 @OA\Property(property="price", type="number", example=53.95),
+     *                 @OA\Property(property="total", type="number", example=53.95),
+     *                 @OA\Property(property="product_variation_id", type="integer", example=251295),
+     *                 @OA\Property(property="product_title", type="string", example="Premium T-Shirt"),
+     *                 @OA\Property(property="variation_color", type="string", example="Black"),
+     *                 @OA\Property(property="variation_size", type="string", example="L"),
+     *
+     *                 @OA\Property(
+     *                     property="art_files",
+     *                     type="object",
+     *                     description="Saved QR + Design for each position.",
+     *                     @OA\Property(
+     *                         property="Back",
+     *                         type="object",
+     *                         @OA\Property(property="qr_id", type="integer", example=16),
+     *                         @OA\Property(property="design_id", type="integer", example=20)
+     *                     ),
+     *                     @OA\Property(
+     *                         property="Front",
+     *                         type="object",
+     *                         @OA\Property(property="qr_id", type="integer", example=15),
+     *                         @OA\Property(property="design_id", type="integer", example=18)
+     *                     )
      *                 )
      *             ),
      *             @OA\Property(property="message", type="string", example="Product added to cart successfully!")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
-     *         description="Validation Error.",
+     *         description="Validation Error",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="Validation Error."),
      *             @OA\Property(property="errors", type="object",
@@ -74,25 +106,27 @@ class CartController extends BaseController
      *                 @OA\Property(property="product_id", type="array", @OA\Items(type="string", example="The product_id field is required.")),
      *                 @OA\Property(property="qty", type="array", @OA\Items(type="string", example="The qty must be numeric.")),
      *                 @OA\Property(property="price", type="array", @OA\Items(type="string", example="The price must be numeric.")),
-     *                 @OA\Property(property="product_variation_id", type="array", @OA\Items(type="string", example="The product_variation_id field is required.")),
-     *                 @OA\Property(property="art_files", type="array", @OA\Items(type="string", example="The art_files field is required."))
+     *                 @OA\Property(property="art_files", type="array", @OA\Items(type="string", example="The art_files field is required.")),
+     *                 @OA\Property(property="art_files.*.qr_id", type="array", @OA\Items(type="string", example="The qr_id field is required.")),
+     *                 @OA\Property(property="art_files.*.design_id", type="array", @OA\Items(type="string", example="The design_id field is required."))
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=500,
-     *         description="Internal Server Error.",
+     *         description="Internal Server Error",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Failed to add the product to the cart.")
+     *             @OA\Property(property="message", type="string", example="Failed to add the product into cart.")
      *         )
      *     )
      * )
      */
 
 
-
     public function addCart(Request $request)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
             'product_id' => 'required',
@@ -144,12 +178,38 @@ class CartController extends BaseController
                     }
 
                     // Check each art file before creating the cart
-                    foreach ($request['art_files'] as $key => $qrcode_id) {
-                        if (empty($key) || empty($qrcode_id) || !in_array($key, $merchmake_product_art_files)) {
+                    // foreach ($request['art_files'] as $key => $qrcode_id) {
+                    //     if (empty($key) || empty($qrcode_id) || !in_array($key, $merchmake_product_art_files)) {
+                    //         return $this->sendError('error.', 'Invalid art file position.');
+                    //     }
+                    //     if (empty(Qrcodes::where('id', $qrcode_id)->first())) {
+                    //         return $this->sendError('error.', 'Invalid QR code.');
+                    //     }
+                    // }
+
+                    foreach ($request['art_files'] as $position => $values) {
+
+                        // Validate position (Back, Front, etc.)
+                        if (empty($position) || !in_array($position, $merchmake_product_art_files)) {
                             return $this->sendError('error.', 'Invalid art file position.');
                         }
-                        if (empty(Qrcodes::where('id', $qrcode_id)->first())) {
+
+                        // Validate structure: must contain file_id & design_id
+                        $fileId   = $values['qr_id']   ?? null;
+                        $designId = $values['design_id'] ?? null;
+
+                        if (empty($fileId)) {
+                            return $this->sendError('error.', 'QR code is missing.');
+                        }
+
+                        // Validate QR code exists
+                        if (!Qrcodes::where('id', $fileId)->exists()) {
                             return $this->sendError('error.', 'Invalid QR code.');
+                        }
+
+                        // Validate Design exists
+                        if (!Desing::where('id', $designId)->exists()) {
+                            return $this->sendError('error.', 'Invalid design ID.');
                         }
                     }
                 }
@@ -168,10 +228,26 @@ class CartController extends BaseController
                 ]);
 
                 // Add art files to cart if present
-                foreach ($request['art_files'] as $key => $qrcode_id) {
+                // foreach ($request['art_files'] as $key => $qrcode_id) {
+                //     dd($key, $qrcode_id);
+                //     $cart->cartItmesQrCodes()->create([
+                //         'qrcode_id' => $qrcode_id,
+                //         'position' => $key
+                //     ]);
+                // }
+
+                foreach ($request['art_files'] as $side => $values) {
+
+                    $fileId   = $values['qr_id'] ?? null;
+                    $designId = $values['design_id'] ?? null;
+
+                    $getImage = generateDesingWithQr($designId, $fileId);
+
                     $cart->cartItmesQrCodes()->create([
-                        'qrcode_id' => $qrcode_id,
-                        'position' => $key
+                        'qrcode_id' => $fileId,
+                        'design_id' => $designId,
+                        'position'  => $side,
+                        'desing_with_qr' => $getImage['image_path'] ?? null  // store generated image path in DB
                     ]);
                 }
 
@@ -414,13 +490,18 @@ class CartController extends BaseController
                 }
 
                 // Resize QR with transparency
-                $targetW = $design->target_width ?? 340;
-                $targetH = $design->target_height ?? 340;
+                // $targetW = $design->target_width ?? 150;
+                // $targetH = $design->target_height ?? 150;
+                $targetW =  200;
+                $targetH =  200;
                 $qrResized = resizeWithTransparency($qrFilePath, $targetW, $targetH);
 
                 // Position & rotation
-                $posX = intval($design->x_axis);
-                $posY = intval($design->y_axis);
+                // $posX = intval($design->x_axis);
+                // $posY = intval($design->y_axis);
+
+                $posX = 640;
+                $posY = 910;
                 $rotation = $design->rotation ?? 0;
 
                 // Rotate if needed
@@ -475,8 +556,6 @@ class CartController extends BaseController
             ], 500);
         }
     }
-
-
 
     /**
      * @OA\Get(

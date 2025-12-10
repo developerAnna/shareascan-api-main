@@ -1,12 +1,14 @@
 <?php
 
+use App\Models\Desing;
+use App\Models\Qrcodes;
 use App\Models\Setting;
 use App\Models\OrderItems;
 use App\Services\MerchMake;
 use chillerlan\QRCode\QRCode;
+
 use App\Models\ProductSetting;
 use chillerlan\QRCode\QROptions;
-
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use chillerlan\QRCode\Data\QRMatrix;
@@ -618,7 +620,7 @@ if (! function_exists('getSelectedVariationPrice')) {
         $merchMake = new MerchMake();
         $merchmake_product = $merchMake->getSingleProduct($product_id);
 
-        if($merchmake_product == false){
+        if ($merchmake_product == false) {
             return null;
         }
 
@@ -895,9 +897,9 @@ if (!function_exists('generateQR')) {
         // Set folder path based on the source
         if ($source == 'admin') {
             $folderPath = 'qrcodes/';
-        } else if($source == 'post') {
+        } else if ($source == 'post') {
             $folderPath = 'posts/';
-        }else {
+        } else {
             $folderPath = 'OrderItemQrcodes/';
         }
 
@@ -1005,3 +1007,224 @@ function resizeWithTransparency($sourcePath, $targetW, $targetH)
     return $dstImg;
 }
 
+
+function generateDesingWithQr($design_id, $qr_id)
+{
+    try {
+        if (!$design_id) {
+            return [
+                'success' => false,
+                'message' => 'Design ID is required'
+            ];
+        }
+
+        $design = Desing::find($design_id);
+
+        if (!$design) {
+            return [
+                'success' => false,
+                'message' => 'Design not found'
+            ];
+        }
+
+        $basePath = storage_path('app/public/DesignImages/' . $design->image_name);
+
+        if (!file_exists($basePath)) {
+            return [
+                'success' => false,
+                'message' => 'Base design image missing'
+            ];
+        }
+
+        // Load base image
+        $base = imagecreatefromstring(file_get_contents($basePath));
+        imagesavealpha($base, true);
+        imagealphablending($base, true);
+
+        $qr = Qrcodes::find($qr_id);
+
+        if (!$qr || !$qr->qr_image) {
+            return [
+                'success' => false,
+                'message' => "QR (#$qr_id) image not found"
+            ];
+        }
+
+        $qrFilePath = public_path('storage/' . $qr->qr_image_path);
+
+        if (!file_exists($qrFilePath)) {
+            return [
+                'success' => false,
+                'message' => "QR image missing (#$qr_id)"
+            ];
+        }
+
+        // Resize QR
+        $targetW = $design->target_width ?? 150;
+        $targetH = $design->target_height ?? 150;
+
+        $qrResized = resizeWithTransparency($qrFilePath, $targetW, $targetH);
+
+        // Positioning
+        $posX = intval($design->x_axis);
+        $posY = intval($design->y_axis);
+        $rotation = $design->rotation ?? 0;
+
+        // Apply rotation if needed
+        if ($rotation != 0) {
+            $transparent = imagecolorallocatealpha($qrResized, 0, 0, 0, 127);
+            $qrRotated = imagerotate($qrResized, -$rotation, $transparent);
+            imagesavealpha($qrRotated, true);
+
+            imagecopy($base, $qrRotated, $posX, $posY, 0, 0, imagesx($qrRotated), imagesy($qrRotated));
+            imagedestroy($qrRotated);
+        } else {
+            imagecopy($base, $qrResized, $posX, $posY, 0, 0, $targetW, $targetH);
+        }
+
+        imagedestroy($qrResized);
+
+        // Save generated image in new folder
+        $folder = storage_path('app/public/CartItemsDesignWithQr/');
+        if (!file_exists($folder)) mkdir($folder, 0777, true);
+
+        $finalName = 'cart_item_design_' . time() . '.png';
+        $finalPath = $folder . $finalName;
+
+        if (imagepng($base, $finalPath, 6)) {
+            imagedestroy($base);
+
+            return [
+                'success' => true,
+                'image_url' => url('storage/CartItemsDesignWithQr/' . $finalName),
+                'image_path' => 'CartItemsDesignWithQr/' . $finalName, // For DB
+                'message' => 'Image generated successfully'
+            ];
+        }
+
+        imagedestroy($base);
+
+        return [
+            'success' => false,
+            'message' => 'Failed to save final image'
+        ];
+
+    } catch (\Throwable $e) {
+
+        return [
+            'success' => false,
+            'message' => $e->getMessage()
+        ];
+    }
+}
+
+function generateDesingWithQrOrders($design_id, $qr_image)
+{
+    try {
+        if (!$design_id) {
+            return [
+                'success' => false,
+                'message' => 'Design ID is required'
+            ];
+        }
+
+        $design = Desing::find($design_id);
+
+        if (!$design) {
+            return [
+                'success' => false,
+                'message' => 'Design not found'
+            ];
+        }
+
+        $basePath = storage_path('app/public/DesignImages/' . $design->image_name);
+
+        if (!file_exists($basePath)) {
+            return [
+                'success' => false,
+                'message' => 'Base design image missing'
+            ];
+        }
+
+        // Load base image
+        $base = imagecreatefromstring(file_get_contents($basePath));
+        imagesavealpha($base, true);
+        imagealphablending($base, true);
+
+        $qrImage = $qr_image;
+
+        if (!$qr_image) {
+            return [
+                'success' => false,
+                'message' => "QR (#$qr_image) image not found"
+            ];
+        }
+
+        $qrFilePath = public_path('storage/' . $qr_image);
+
+        if (!file_exists($qrFilePath)) {
+            return [
+                'success' => false,
+                'message' => "QR image missing (#$qr_image)"
+            ];
+        }
+
+        // Resize QR
+        $targetW = $design->target_width ?? 150;
+        $targetH = $design->target_height ?? 150;
+
+        $qrResized = resizeWithTransparency($qrFilePath, $targetW, $targetH);
+
+        // Positioning
+        $posX = intval($design->x_axis);
+        $posY = intval($design->y_axis);
+        $rotation = $design->rotation ?? 0;
+
+        // Apply rotation if needed
+        if ($rotation != 0) {
+            $transparent = imagecolorallocatealpha($qrResized, 0, 0, 0, 127);
+            $qrRotated = imagerotate($qrResized, -$rotation, $transparent);
+            imagesavealpha($qrRotated, true);
+
+            imagecopy($base, $qrRotated, $posX, $posY, 0, 0, imagesx($qrRotated), imagesy($qrRotated));
+            imagedestroy($qrRotated);
+        } else {
+            imagecopy($base, $qrResized, $posX, $posY, 0, 0, $targetW, $targetH);
+        }
+
+        imagedestroy($qrResized);
+
+        // Save generated image in new folder
+        $folder = storage_path('app/public/OrderItemsDesingWithQr/');
+        if (!file_exists($folder)) mkdir($folder, 0777, true);
+
+        $finalName = 'cart_item_design_' . time() . '.png';
+        $finalPath = $folder . $finalName;
+
+        if (imagepng($base, $finalPath, 6)) {
+            imagedestroy($base);
+
+            return [
+                'success' => true,
+                'filename' => $finalName,
+                'image_url' => url('storage/OrderItemsDesingWithQr/' . $finalName),
+                'image_path' => 'OrderItemsDesingWithQr/' . $finalName, // For DB
+                'message' => 'Image generated successfully'
+            ];
+        }
+
+        imagedestroy($base);
+
+        return [
+            'success' => false,
+            'message' => 'Failed to save final image'
+        ];
+
+    } catch (\Throwable $e) {
+
+        return [
+            'success' => false,
+            'message' => $e->getMessage()
+        ];
+    }
+}

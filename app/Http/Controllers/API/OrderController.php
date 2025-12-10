@@ -247,10 +247,13 @@ class OrderController extends BaseController
                         // Check if the item has QR codes and generate a unique QR code for each item
                         if (isset($cart_item->cartItmesQrCodes)) {
                             foreach ($cart_item->cartItmesQrCodes as $cartItemQrCode) {
+                                // dd($cartItemQrCode->design_id);
                                 $rgbValue = json_decode($cartItemQrCode->qrcode->rgb_color);
 
                                 $generateURL = env('FRONT_URL') . "/content/" . $cart_item->user_id . "/" . $cart_item->product_id . "/" .  $order_item->id;
                                 $generate_qr = generateQR($cartItemQrCode->qrcode->hexa_color, $rgbValue, $generateURL, $source = 'user');
+
+                                $generate_desing_with_qr = generateDesingWithQrOrders($cartItemQrCode->design_id,$generate_qr['filepath']);
 
                                 if (!empty($generate_qr['filename']) && !empty($generate_qr['filepath'])) {
                                     $order_qr_code = new OrderItemQrCodes();
@@ -261,6 +264,9 @@ class OrderController extends BaseController
                                     $order_qr_code->qrcode_content_type = 'text';
                                     $order_qr_code->qr_image = $generate_qr['filename'];
                                     $order_qr_code->qr_image_path = $generate_qr['filepath'];
+                                    $order_qr_code->design_id = $cartItemQrCode->design_id;
+                                    $order_qr_code->desing_image = $generate_desing_with_qr['filename'] ?? null ;
+                                    $order_qr_code->desing_file_path = $generate_desing_with_qr['image_path'] ?? null ;
                                     $order_qr_code->status = 1;
                                     $order_qr_code->save();
                                 }
