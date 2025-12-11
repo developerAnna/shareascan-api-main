@@ -45,7 +45,7 @@ class CartResource extends JsonResource
                     'design_image_path' => $design ? $design->image_path : null,
                     'design_image_url' => $design ? asset('storage/' . $design->image_path) : null,
 
-                    'qr_with_desing_final_image' => $cartQr ? asset('storage/' . $cartQr->desing_with_qr) : null,
+                    'qr_with_desing_final_image' => $cartQr->desing_with_qr ? asset('storage/' . $cartQr->desing_with_qr) : null,
 
                     // BACK / FRONT POSITION
                     'position' => $cartQr->position,

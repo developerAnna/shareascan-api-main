@@ -250,7 +250,8 @@ class OrderController extends BaseController
                                 // dd($cartItemQrCode->design_id);
                                 $rgbValue = json_decode($cartItemQrCode->qrcode->rgb_color);
 
-                                $generateURL = env('FRONT_URL') . "/content/" . $cart_item->user_id . "/" . $cart_item->product_id . "/" .  $order_item->id;
+                                $generateURL = env('FRONT_APP_URL') . "/content/" . $cart_item->user_id . "/" . $cart_item->product_id . "/" .  $order_item->id;
+                                Log::info($generateURL);
                                 $generate_qr = generateQR($cartItemQrCode->qrcode->hexa_color, $rgbValue, $generateURL, $source = 'user');
 
                                 $generate_desing_with_qr = generateDesingWithQrOrders($cartItemQrCode->design_id,$generate_qr['filepath']);

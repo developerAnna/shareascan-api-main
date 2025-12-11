@@ -208,7 +208,7 @@ class CartController extends BaseController
                         }
 
                         // Validate Design exists
-                        if (!Desing::where('id', $designId)->exists()) {
+                        if (!empty($designId) && !Desing::where('id', $designId)->exists()) {
                             return $this->sendError('error.', 'Invalid design ID.');
                         }
                     }

@@ -75,6 +75,9 @@ class OrderResource extends JsonResource
                                     'status' => $code->status,
                                     'qr_content' => $code->qr_content,
                                     'qrcode_content_type' => $code->qrcode_content_type,
+                                    'design_id' => $code->design_id,
+                                    'design_file' => $code->desing_image,
+                                    'desing_final_image' =>  asset('storage/' . $code->desing_file_path) ?? null,
                                 ];
                             });
                         })->values(),

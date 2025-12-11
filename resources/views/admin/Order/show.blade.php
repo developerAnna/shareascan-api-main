@@ -263,7 +263,7 @@
                                                             <th>Merchmake Product Id</th>
                                                             <th>Product Images</th>
                                                             <th>Variation</th>
-                                                            <th>Qr Images</th>
+                                                            <th>Art Images</th>
                                                             <th>Quantity</th>
                                                             <th>Price</th>
                                                             <th>Sub Total</th>
@@ -305,8 +305,13 @@
                                                                                         <p>{{ $qrCode->position }} qr for
                                                                                             qty
                                                                                             {{ $key + 1 }}</p>
-                                                                                        <img src="{{ asset('storage/' . $qrCode->qr_image_path) }}"
-                                                                                            width="100" alt="QR Image">
+                                                                                        @if(!empty($qrCode->design_id )&& !empty($qrCode->desing_image))
+                                                                                            <img src="{{ asset('storage/' . $qrCode->desing_file_path) }}"
+                                                                                                width="100" alt="Design Image">
+                                                                                        @else
+                                                                                            <img src="{{ asset('storage/' . $qrCode->qr_image_path) }}"
+                                                                                                width="100" alt="QR Image">
+                                                                                        @endif
                                                                                     </div>
                                                                                 @endforeach
                                                                             @endif
