@@ -78,6 +78,7 @@ class MerchMake
                 ],
                 'query' => [
                     'store_id' => $settings['store_id'], // Use store_id from settings
+                    'is_draft' => 0, 
                 ]
             ]);
 

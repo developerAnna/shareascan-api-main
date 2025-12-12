@@ -1198,7 +1198,7 @@ function generateDesingWithQrOrders($design_id, $qr_image)
         $folder = storage_path('app/public/OrderItemsDesingWithQr/');
         if (!file_exists($folder)) mkdir($folder, 0777, true);
 
-        $finalName = 'cart_item_design_' . time() . '.png';
+        $finalName = 'order_item_design_' . time() . '.png';
         $finalPath = $folder . $finalName;
 
         if (imagepng($base, $finalPath, 6)) {
