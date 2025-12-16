@@ -815,7 +815,7 @@ class PostController extends Controller
             $filename = "qr-codes/posts/post_{$post->id}_" . time() . '.png';
 
             // Generate QR code using the existing helper function
-            $qrCodeData = generateQR('#000000', [0, 0, 0], $postUrl, 'post');
+            $qrCodeData = generateQR('#000000', [0, 0, 0], $postUrl, 'post',null);
 
             $qr_code_path = $qrCodeData['filepath'] ?? $filename;
 

@@ -71,7 +71,7 @@ class QrcodeController extends Controller
             if ($request->hexa_color) {
                 $getRGBValue = getRGBValue($request->hexa_color, $opacity = false);
                 if (!empty($getRGBValue)) {
-                    $generate_qr = generateQR($request->hexa_color, $getRGBValue, $request->qr_data, $source = 'admin');
+                    $generate_qr = generateQR($request->hexa_color, $getRGBValue, $request->qr_data, $source = 'admin',$request->qr_background);
                     if (!empty($generate_qr) && !empty($generate_qr['filename']) && !empty($generate_qr['filepath'])) {
                         $qrcode = new Qrcodes();
                         $qrcode->hexa_color = $request->hexa_color;
@@ -79,6 +79,7 @@ class QrcodeController extends Controller
                         $qrcode->qr_data = $request->qr_data;
                         $qrcode->qr_image = $generate_qr['filename'];
                         $qrcode->qr_image_path = $generate_qr['filepath'];
+                        $qrcode->qr_background = $request->qr_background;
                         $qrcode->save();
                     }
                 }

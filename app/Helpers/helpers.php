@@ -113,8 +113,24 @@ if (!function_exists('getNewArrivalProducts')) {
     function getNewArrivalProducts()
     {
 
-        $merchMake = new MerchMake();
-        $merchmake_products = $merchMake->getProducts();
+        // $merchMake = new MerchMake();
+        // $merchmake_products = $merchMake->getProducts();
+
+        $jsonPath = storage_path('app/public/merchmake/products.json');
+
+        $merchmake_products = null;
+
+        // Try reading from JSON file
+        if (file_exists($jsonPath)) {
+            $jsonContent = file_get_contents($jsonPath);
+            $merchmake_products = json_decode($jsonContent, true);
+        }
+
+        // Fallback to API if JSON missing or invalid
+        if (empty($merchmake_products)) {
+            $merchMake = new MerchMake();
+            $merchmake_products = $merchMake->getProducts();
+        }
 
         $db_products = ProductSetting::where('type', 'new_arrivals')->pluck('product_id')->toArray();
         $new_arrival_products = [];
@@ -137,8 +153,25 @@ if (!function_exists('getBestSellerProducts')) {
     function getBestSellerProducts()
     {
 
-        $merchMake = new MerchMake();
-        $merchmake_products = $merchMake->getProducts();
+        // $merchMake = new MerchMake();
+        // $merchmake_products = $merchMake->getProducts();
+
+        $jsonPath = storage_path('app/public/merchmake/products.json');
+
+        $merchmake_products = null;
+
+        // Try reading from JSON file
+        if (file_exists($jsonPath)) {
+            $jsonContent = file_get_contents($jsonPath);
+            $merchmake_products = json_decode($jsonContent, true);
+        }
+
+        // Fallback to API if JSON missing or invalid
+        if (empty($merchmake_products)) {
+            $merchMake = new MerchMake();
+            $merchmake_products = $merchMake->getProducts();
+        }
+
         $db_products = ProductSetting::where('type', 'best_seller')->pluck('product_id')->toArray();
 
         $best_seller_products = [];
@@ -822,8 +855,25 @@ if (! function_exists('getRGBValue')) {
 //     }
 // }
 
+function hexToRgb(string $hex): array
+{
+    $hex = ltrim($hex, '#');
+
+    // Support short hex (#fff)
+    if (strlen($hex) === 3) {
+        $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+    }
+
+    return [
+        hexdec(substr($hex, 0, 2)),
+        hexdec(substr($hex, 2, 2)),
+        hexdec(substr($hex, 4, 2)),
+    ];
+}
+
+
 if (!function_exists('generateQR')) {
-    function generateQR($hexa_color, $RGB_color, $qr_data, $source)
+    function generateQR($hexa_color, $RGB_color, $qr_data, $source, $qr_background_color = null)
     {
         if (!class_exists('QRImageWithLogo')) {
             // Custom QR Image Class with Logo
@@ -863,10 +913,20 @@ if (!function_exists('generateQR')) {
 
         $drawCircularModules = false;
 
+        $bgRGB = $qr_background_color;
+
+        if ($qr_background_color !== null) {
+
+            $bgRGB = is_array($qr_background_color)
+                ? $qr_background_color
+                : hexToRgb($qr_background_color);
+        }
+
         // QR code configuration
         $options->version = 6;
         $options->scale = 62;
-        $options->imageTransparent = true; // Enable transparent image output
+        // $options->imageTransparent = true; // Enable transparent image output
+        $options->imageTransparent = true;
         $options->drawCircularModules = (bool) $drawCircularModules;
         $options->circleRadius = $drawCircularModules ? 0.45 : 0;
         $options->eccLevel = EccLevel::H;
@@ -874,17 +934,56 @@ if (!function_exists('generateQR')) {
         $options->logoSpaceWidth = 13;
         $options->logoSpaceHeight = 13;
 
+        if ($qr_background_color !== null) {
+            $options->bgColor          = $bgRGB;
+            $options->imageTransparent = false;          // IMPORTANT
+            $options->drawLightModules = false;           // same as Imagick example
+        }
+
         // Set the color scheme for the QR code with dynamic color input
+        // $options->moduleValues = [
+        //     QRMatrix::M_FINDER_DARK => $RGB_color,
+        //     QRMatrix::M_FINDER_DOT => $RGB_color,
+        //     QRMatrix::M_ALIGNMENT_DARK => $RGB_color,
+        //     QRMatrix::M_TIMING_DARK => $RGB_color,
+        //     QRMatrix::M_FORMAT_DARK => $RGB_color,
+        //     QRMatrix::M_VERSION_DARK => $RGB_color,
+        //     QRMatrix::M_DATA_DARK => $RGB_color,
+        //     QRMatrix::M_DARKMODULE => $RGB_color,
+        // ];
+
         $options->moduleValues = [
-            QRMatrix::M_FINDER_DARK => $RGB_color,
-            QRMatrix::M_FINDER_DOT => $RGB_color,
+            QRMatrix::M_FINDER_DARK    => $RGB_color,
+            QRMatrix::M_FINDER_DOT     => $RGB_color,
             QRMatrix::M_ALIGNMENT_DARK => $RGB_color,
-            QRMatrix::M_TIMING_DARK => $RGB_color,
-            QRMatrix::M_FORMAT_DARK => $RGB_color,
-            QRMatrix::M_VERSION_DARK => $RGB_color,
-            QRMatrix::M_DATA_DARK => $RGB_color,
-            QRMatrix::M_DARKMODULE => $RGB_color,
+            QRMatrix::M_TIMING_DARK    => $RGB_color,
+            QRMatrix::M_FORMAT_DARK    => $RGB_color,
+            QRMatrix::M_VERSION_DARK   => $RGB_color,
+            QRMatrix::M_DATA_DARK      => $RGB_color,
+            QRMatrix::M_DARKMODULE     => $RGB_color,
         ];
+
+        // ===============================
+        // LIGHT MODULES (ONLY IF BACKGROUND PROVIDED)
+        // ===============================
+        if ($qr_background_color !== null) {
+
+            $bgRGB = is_array($qr_background_color)
+                ? $qr_background_color
+                : hexToRgb($qr_background_color);
+
+            $options->moduleValues += [
+                QRMatrix::M_FINDER     => $bgRGB,
+                QRMatrix::M_ALIGNMENT  => $bgRGB,
+                QRMatrix::M_TIMING     => $bgRGB,
+                QRMatrix::M_FORMAT     => $bgRGB,
+                QRMatrix::M_VERSION    => $bgRGB,
+                QRMatrix::M_DATA       => $bgRGB,
+                QRMatrix::M_SEPARATOR  => $bgRGB,
+                QRMatrix::M_QUIETZONE  => $bgRGB,
+            ];
+        }
+
 
         // Initialize QRCode generator
         $qrcode = new QRCode($options);
@@ -917,8 +1016,6 @@ if (!function_exists('generateQR')) {
         ];
     }
 }
-
-
 
 
 if (!function_exists('generateUniqueCode')) {
@@ -1108,7 +1205,6 @@ function generateDesingWithQr($design_id, $qr_id)
             'success' => false,
             'message' => 'Failed to save final image'
         ];
-
     } catch (\Throwable $e) {
 
         return [
@@ -1219,7 +1315,6 @@ function generateDesingWithQrOrders($design_id, $qr_image)
             'success' => false,
             'message' => 'Failed to save final image'
         ];
-
     } catch (\Throwable $e) {
 
         return [

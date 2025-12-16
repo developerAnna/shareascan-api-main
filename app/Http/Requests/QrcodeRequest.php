@@ -27,6 +27,7 @@ class QrcodeRequest extends FormRequest
                 : '',
 
             'qr_data' => 'required',
+            'qr_background' => 'nullable',
         ];
     }
 }

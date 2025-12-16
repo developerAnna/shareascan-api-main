@@ -35,6 +35,18 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label" for="hexa_color">QR Background Hex Color Value</label>
+                            <input type="text" name="qr_background" id="qr_background" class="form-control"
+                                value="{{ old('qr_background', isset($qrcode) ? $qrcode->qr_background : '') }}"
+                                id="qr_background" placeholder="Enter Qr Background Hexa color" />
+                            @error('qr_background')
+                                <div class="invalid-feedback">
+                                    <strong>{{ $message }}</strong>
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label" for="qr_data">QR data</label>
                             <input type="text" name="qr_data" class="form-control"
                                 value="{{ old('qr_data', isset($qrcode) ? $qrcode->qr_data : 'https://shareascan.com') }}"
@@ -57,6 +69,15 @@
             $(document).ready(function() {
                 // When the input loses focus (blur event), check and add the '#' if missing
                 $('#hexa_color').blur(function() {
+                    var colorValue = $(this).val().trim();
+
+                    // If the value doesn't start with '#', prepend it
+                    if (colorValue && colorValue[0] !== '#') {
+                        $(this).val('#' + colorValue);
+                    }
+                });
+
+                $('#qr_background').blur(function() {
                     var colorValue = $(this).val().trim();
 
                     // If the value doesn't start with '#', prepend it

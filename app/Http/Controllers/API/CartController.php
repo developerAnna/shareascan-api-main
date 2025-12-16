@@ -490,18 +490,18 @@ class CartController extends BaseController
                 }
 
                 // Resize QR with transparency
-                // $targetW = $design->target_width ?? 150;
-                // $targetH = $design->target_height ?? 150;
-                $targetW =  200;
-                $targetH =  200;
+                $targetW = $design->target_width ?? 150;
+                $targetH = $design->target_height ?? 150;
+                // $targetW =  360;
+                // $targetH =  360;
                 $qrResized = resizeWithTransparency($qrFilePath, $targetW, $targetH);
 
                 // Position & rotation
-                // $posX = intval($design->x_axis);
-                // $posY = intval($design->y_axis);
+                $posX = intval($design->x_axis);
+                $posY = intval($design->y_axis);
 
-                $posX = 640;
-                $posY = 910;
+                // $posX = 950;
+                // $posY = 420;
                 $rotation = $design->rotation ?? 0;
 
                 // Rotate if needed
