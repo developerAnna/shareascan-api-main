@@ -46,6 +46,7 @@ Route::get('/product-price/{id}', [ShopPageController::class, 'getShopPageProduc
 Route::get('/product-detail/{id}', [ProductDetailController::class, 'getProductDetail']);
 Route::get('/get_variation_price/{id}', [ProductDetailController::class, 'getVariationPrice']);
 Route::get('/qr-codes', [ProductDetailController::class, 'getQrCodes']);
+Route::get('/qr-codes-with-background', [ProductDetailController::class, 'getQrCodesWithBackground']);
 
 // get reviews
 Route::get('/get-reviews/{id}', [ReviewController::class, 'getReviews']);

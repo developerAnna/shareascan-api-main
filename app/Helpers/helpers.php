@@ -232,51 +232,97 @@ if (!function_exists('getShopPageCategories')) {
 //     }
 // }
 
+// if (!function_exists('getProductPrice')) {
+
+//     function getProductPrice($product_id)
+//     {
+//         // Initialize variables to store the highest and lowest prices
+//         $highestPrice = null;
+//         $lowestPrice = null;
+
+//         $merchMake = new MerchMake();
+//         $merchmake_product = $merchMake->getSingleProduct($product_id);
+//         if (!empty($merchmake_product)) {
+//             $product_variations = $merchmake_product['variations'];
+
+//             // Check if the product variations are not empty
+//             if (!empty($product_variations)) {
+//                 foreach ($product_variations as $product_variation) {
+//                     // Check if price is available for the current variation
+//                     if (isset($product_variation['price'])) {
+//                         $price = $product_variation['price'];
+
+//                         // Set the first price as both highest and lowest
+//                         if ($highestPrice === null || $price > $highestPrice) {
+//                             $highestPrice = $price;
+//                         }
+
+//                         if ($lowestPrice === null || $price < $lowestPrice) {
+//                             $lowestPrice = $price;
+//                         }
+//                     }
+//                 }
+//             }
+
+//             // Return the array with highest and lowest prices
+//             return [
+//                 'max_price' => $highestPrice,
+//                 'min_price' => $lowestPrice
+//             ];
+//         } else {
+//             return [
+//                 'max_price' => null,
+//                 'min_price' => null
+//             ];
+//         }
+//     }
+// }
+
 if (!function_exists('getProductPrice')) {
 
     function getProductPrice($product_id)
     {
-        // Initialize variables to store the highest and lowest prices
-        $highestPrice = null;
-        $lowestPrice = null;
+        $path = storage_path('app/public/merchmake/product_prices.json');
 
-        $merchMake = new MerchMake();
-        $merchmake_product = $merchMake->getSingleProduct($product_id);
-        if (!empty($merchmake_product)) {
-            $product_variations = $merchmake_product['variations'];
+        // 1. Read from JSON
+        if (file_exists($path)) {
+            $prices = json_decode(file_get_contents($path), true);
 
-            // Check if the product variations are not empty
-            if (!empty($product_variations)) {
-                foreach ($product_variations as $product_variation) {
-                    // Check if price is available for the current variation
-                    if (isset($product_variation['price'])) {
-                        $price = $product_variation['price'];
+            if (isset($prices[$product_id])) {
+                return $prices[$product_id];
+            }
+        }
 
-                        // Set the first price as both highest and lowest
-                        if ($highestPrice === null || $price > $highestPrice) {
-                            $highestPrice = $price;
-                        }
+        // 2. Fallback (only if JSON missing)
+        try {
+            $merchMake = new MerchMake();
+            $product = $merchMake->getSingleProduct($product_id);
 
-                        if ($lowestPrice === null || $price < $lowestPrice) {
-                            $lowestPrice = $price;
-                        }
-                    }
-                }
+            if (empty($product['variations'])) {
+                return ['min_price' => null, 'max_price' => null];
             }
 
-            // Return the array with highest and lowest prices
+            $min = null;
+            $max = null;
+
+            foreach ($product['variations'] as $variation) {
+                if (!isset($variation['price'])) continue;
+
+                $price = (float) $variation['price'];
+                $min = $min === null ? $price : min($min, $price);
+                $max = $max === null ? $price : max($max, $price);
+            }
+
             return [
-                'max_price' => $highestPrice,
-                'min_price' => $lowestPrice
+                'min_price' => $min,
+                'max_price' => $max
             ];
-        } else {
-            return [
-                'max_price' => null,
-                'min_price' => null
-            ];
+        } catch (\Exception $e) {
+            return ['min_price' => null, 'max_price' => null];
         }
     }
 }
+
 
 
 if (! function_exists('paginateArray')) {
@@ -570,12 +616,28 @@ if (! function_exists('getProductWithSelectedSize')) {
 if (! function_exists('searchProduct')) {
     function searchProduct($search_text)
     {
-        $merchMake = new MerchMake();
-        // $merchmake_products = $merchMake->getProducts();
-        $merchmake_products = Cache::remember('merchmake_all_products', now()->addHour(1), function () {
+        // $merchMake = new MerchMake();
+        // // $merchmake_products = $merchMake->getProducts();
+        // $merchmake_products = Cache::remember('merchmake_all_products', now()->addHour(1), function () {
+        //     $merchMake = new MerchMake();
+        //     return $merchMake->getProducts();
+        // });
+
+        $jsonPath = storage_path('app/public/merchmake/products.json');
+
+        $merchmake_products = null;
+
+        // Try reading from JSON file
+        if (file_exists($jsonPath)) {
+            $jsonContent = file_get_contents($jsonPath);
+            $merchmake_products = json_decode($jsonContent, true);
+        }
+
+        // Fallback to API if JSON missing or invalid
+        if (empty($merchmake_products)) {
             $merchMake = new MerchMake();
-            return $merchMake->getProducts();
-        });
+            $merchmake_products = $merchMake->getProducts();
+        }
 
         $search_products = [];
         if (!empty($merchmake_products)) {

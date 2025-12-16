@@ -299,4 +299,134 @@ class ProductDetailController extends BaseController
             return $this->sendError('Error retrieving QR codes.', $e->getMessage());
         }
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/qr-codes-with-background",
+     *     summary="Retrieve QR codes with background",
+     *     description="Get a list of generated QR codes that have a background color applied.",
+     *     operationId="getQrCodesWithBackground",
+     *     tags={"Product Detail Page"},
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="QR codes with background retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="success",
+     *                 type="boolean",
+     *                 example=true
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Qrcodes retrieved successfully!"
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(
+     *                         property="id",
+     *                         type="integer",
+     *                         description="ID of the QR code",
+     *                         example=1
+     *                     ),
+     *                     @OA\Property(
+     *                         property="qr_image",
+     *                         type="string",
+     *                         description="QR image filename",
+     *                         example="qr_code_1742292115.png"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="qr_image_path",
+     *                         type="string",
+     *                         description="Public URL of the QR image",
+     *                         example="http://localhost:8000/storage/qrcodes/qr_code_1742292115.png"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="qr_background",
+     *                         type="string",
+     *                         description="Background image filename",
+     *                         example="background_1742292115.png"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="qr_background_path",
+     *                         type="string",
+     *                         description="Public URL of the QR background image",
+     *                         example="http://localhost:8000/storage/qrcodes/background_1742292115.png"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="qr_data",
+     *                         type="string",
+     *                         description="Data used to generate the QR code",
+     *                         example="https://shareascan.com"
+     *                     ),
+     *                     @OA\Property(
+     *                         property="created_at",
+     *                         type="string",
+     *                         format="date-time",
+     *                         description="QR code creation timestamp",
+     *                         example="2025-03-18T15:30:00Z"
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=400,
+     *         description="No QR codes found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="success",
+     *                 type="boolean",
+     *                 example=false
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="No qrcodes found."
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="success",
+     *                 type="boolean",
+     *                 example=false
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Error retrieving QR codes."
+     *             )
+     *         )
+     *     )
+     * )
+     */
+
+
+    public function getQrCodesWithBackground(Request $request)
+    {
+        try {
+            $qrcodes = Qrcodes::where('qr_background', '!=', null)->get();
+
+            if ($qrcodes->count() > 0) {
+                return $this->sendResponse(SampleQrResource::collection($qrcodes), 'Qrcodes retrieved successfully!');
+            } else {
+                return $this->sendError('No qrcodes found.');
+            }
+        } catch (\Exception $e) {
+            return $this->sendError('Error retrieving QR codes.', $e->getMessage());
+        }
+    }
 }

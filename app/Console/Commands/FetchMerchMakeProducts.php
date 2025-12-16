@@ -41,7 +41,7 @@ class FetchMerchMakeProducts extends Command
                 return;
             }
 
-            Log::info('MerchMake products fetched successfully');
+            // Log::info('MerchMake products fetched successfully at ' . now()->toDateTimeString());
 
             // Ensure directory exists
             $directory = storage_path('app/public/merchmake');
@@ -59,7 +59,55 @@ class FetchMerchMakeProducts extends Command
                 )
             );
 
-            $this->info('MerchMake products stored successfully in JSON file.');
+            // -----------------------------
+            // 2. BUILD PRODUCT PRICE JSON
+            // -----------------------------
+            $priceData = [];
+
+            if (!empty($merchmake_products['data'])) {
+
+                foreach ($merchmake_products['data'] as $product) {
+
+                    if (empty($product['id']) || empty($product['variations'])) {
+                        continue;
+                    }
+
+                    $min = null;
+                    $max = null;
+
+                    foreach ($product['variations'] as $variation) {
+
+                        if (!isset($variation['price'])) {
+                            continue;
+                        }
+
+                        $price = (float) $variation['price'];
+
+                        $min = $min === null ? $price : min($min, $price);
+                        $max = $max === null ? $price : max($max, $price);
+                    }
+
+                    if ($min !== null && $max !== null) {
+                        $priceData[$product['id']] = [
+                            'min_price' => $min,
+                            'max_price' => $max
+                        ];
+                    }
+                }
+            }
+
+            // -----------------------------
+            // 3. STORE PRICE JSON
+            // -----------------------------
+            file_put_contents(
+                $directory . '/product_prices.json',
+                json_encode(
+                    $priceData,
+                    JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+                )
+            );
+
+            $this->info('MerchMake products stored successfully in JSON file.'. now()->toDateTimeString());
         } catch (\Exception $e) {
 
             Log::error('MerchMake JSON store error', [
