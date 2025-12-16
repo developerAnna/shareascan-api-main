@@ -48,7 +48,10 @@ class CheckoutController extends BaseController
             $items = Cart::where('user_id', Auth::user()->id)->get();
 
             if ($items->count() > 0) {
-                $total_amount = Cart::where('user_id', Auth::user()->id)->sum('total');
+                // $total_amount = Cart::where('user_id', Auth::user()->id)->sum('total');
+                $total_amount = Cart::where('user_id', Auth::user()->id)
+                    ->selectRaw('SUM(total::numeric) as total')
+                    ->value('total');
 
                 return $this->sendResponse(
                     ['products' => $items, 'total' => $total_amount],
