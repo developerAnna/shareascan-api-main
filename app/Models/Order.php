@@ -10,7 +10,7 @@ class Order extends Model
 
     use SoftDeletes;
 
-    protected $fillable = ['user_id', 'total', 'payment_method', 'payment_status', 'merchmake_order_id', 'merchmake_invoice_id', 'merchmake_order_status', 'note', 'merchmake_response', 'paypal_id', 'paypal_token','status'];
+    protected $fillable = ['user_id', 'total', 'payment_method', 'payment_status', 'merchmake_order_id', 'merchmake_invoice_id', 'merchmake_order_status', 'note', 'merchmake_response', 'paypal_id', 'paypal_token','status','merchmake_status_name'];
 
 
     protected $dates = ['deleted_at'];

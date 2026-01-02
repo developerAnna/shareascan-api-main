@@ -48,6 +48,7 @@ class OrderResource extends JsonResource
                 'id' => $this->id,
                 'merchmake_order_id' => $this->merchmake_order_id,
                 'merchmake_order_status' => $this->merchmake_order_status,
+                'merchmake_status_name' => $this->merchmake_status_name,
                 'user_id' => $this->user_id,
                 // 'order_total' => $this->orderItems->sum('total'),
                 'order_items' => $this->orderItems->groupBy('cart_id')->map(function ($items) {

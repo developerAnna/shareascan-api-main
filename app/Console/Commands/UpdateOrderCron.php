@@ -38,7 +38,7 @@ class UpdateOrderCron extends Command
                     Log::error("Error fetching order from Merchmake for Order ID: {$order->id}");
                 } else {
                     Log::info($merchmake_order['order']['status']);
-                    $order->update(['merchmake_order_status' => $merchmake_order['order']['status']]);
+                    $order->update(['merchmake_order_status' => $merchmake_order['order']['status'],'merchmake_status_name' => $merchmake_order['order']['status_name']]);
                 }
             }
         }

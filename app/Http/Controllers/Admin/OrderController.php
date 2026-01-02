@@ -50,9 +50,9 @@ class OrderController extends Controller
                     if($status == 'Completed'){
                         return "<span class='badge badge-dim bg-label-success'>{$status}</span>";
                     }elseif($status == 'Refunded'){
-                        return "<span class='badge badge-dim bg-label-warning'>{$status}</span>";   
+                        return "<span class='badge badge-dim bg-label-warning'>{$status}</span>";
                     }else{
-                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";   
+                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";
                     }
                 })
 
@@ -61,17 +61,32 @@ class OrderController extends Controller
                     if($status == 'Completed'){
                         return "<span class='badge badge-dim bg-label-success'>{$status}</span>";
                     }elseif($status == 'Pending'){
-                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";   
+                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";
                     }elseif($status == 'Cancelled'){
-                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";   
+                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";
                     }elseif($status == 'Refunded'){
-                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";   
+                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";
                     } else{
-                        return "<span class='badge badge-dim bg-label-secondary'>{$status}</span>";   
+                        return "<span class='badge badge-dim bg-label-secondary'>{$status}</span>";
                     }
                 })
 
-                ->rawColumns(['action', 'order_id','payment_status','order_status'])
+                ->editColumn('merchmake_status_name',function($row){
+                    $status = $row->merchmake_status_name ?? '';
+                    if($status == 'Completed'){
+                        return "<span class='badge badge-dim bg-label-success'>{$status}</span>";
+                    }elseif($status == 'Pending'){
+                        return "<span class='badge badge-dim bg-label-primary'>{$status}</span>";
+                    }elseif($status == 'Cancelled'){
+                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";
+                    }elseif($status == 'Refunded'){
+                        return "<span class='badge badge-dim bg-label-danger'>{$status}</span>";
+                    } else{
+                        return "<span class='badge badge-dim bg-label-secondary'>{$status}</span>";
+                    }
+                })
+
+                ->rawColumns(['action', 'order_id','payment_status','order_status','merchmake_status_name'])
                 ->make(true);
         }
 

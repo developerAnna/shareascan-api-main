@@ -78,7 +78,7 @@ class MerchMake
                 ],
                 'query' => [
                     'store_id' => $settings['store_id'], // Use store_id from settings
-                    'is_draft' => 0, 
+                    'is_draft' => 0,
                 ]
             ]);
 
@@ -199,6 +199,7 @@ class MerchMake
                     'merchmake_order_id' => $result['id'],
                     'merchmake_invoice_id' => $result['invoice'],
                     'merchmake_order_status' => $result['status'],
+                    'merchmake_status_name' => $result['status_name'],
                 ]);
             }
             return $result;

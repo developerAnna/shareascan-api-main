@@ -70,7 +70,7 @@
                                     <!-- Two-column table for order/payment and shipping details -->
                                     <!-- <table class="w-100" style="border-collapse: collapse; width: 100%;">
                                         <tr>
-                        
+
                                             <td style="vertical-align: top; padding-right: 10px;">
                                                 <table style="border-collapse: collapse; width: 100%;">
                                                     <tr>
@@ -212,6 +212,19 @@
                                                             </td>
                                                         </tr>
                                                         <tr>
+                                                            <th>MerchMake Status:</th>
+                                                            <td>
+                                                                @php
+                                                                    $status = $order->merchmake_status_name ?? '';
+                                                                    $badgeClass = 'bg-label-secondary';
+                                                                    if ($status === 'Completed') $badgeClass = 'bg-label-success';
+                                                                    elseif ($status === 'Pending') $badgeClass = 'bg-label-primary';
+                                                                    elseif (in_array($status, ['Cancelled','Refunded'])) $badgeClass = 'bg-label-danger';
+                                                                @endphp
+                                                                <span class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
                                                             <th>Note:</th>
                                                             <td>{{ $order->note }}</td>
                                                         </tr>
@@ -277,25 +290,25 @@
                                                                     null,
                                                                 );
                                                             @endphp
-                                                            
+
                                                             <tr>
-                                                                
+
                                                                 <td>{{ $items->first()->product_title }}</td>
 
-                                                               
+
                                                                 <td>{{ $items->first()->product_id }}</td>
 
-                                                             
+
                                                                 <td>
                                                                     <img src="{{ isset($image_url['image_url']) ? $image_url['image_url'] : '' }}" width="100"
                                                                         alt="Product Image">
                                                                 </td>
 
-                                                             
+
                                                                 <td>{{ $items->first()->variation_color }},
                                                                     {{ $items->first()->variation_size }}</td>
 
-                                                            
+
                                                                 <td>
                                                                     <div class="d-flex flex-wrap">
                                                                         @foreach ($items as $key => $item)
@@ -319,7 +332,7 @@
                                                                     </div>
                                                                 </td>
 
-                                                        
+
                                                                 <td>{{ $items->sum('qty') }}</td>
 
                                                                 <td>${{ number_format($items->first()->price, 2) }}</td>
@@ -327,7 +340,7 @@
                                                             </tr>
                                                         @endforeach
 
-                                                     
+
                                                         <tr>
                                                             <td colspan="7" class="text-right"><strong>Order
                                                                     Total:</strong></td>

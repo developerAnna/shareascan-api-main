@@ -30,6 +30,7 @@
                         <th>Payment Status</th>
                         <th>Order Status</th>
                         <th>MerchMake Order Id</th>
+                        <th>MerchMake Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -81,6 +82,10 @@
                         {
                             data: 'merchmake_order_id',
                             name: 'merchmake_order_id'
+                        },
+                        {
+                            data: 'merchmake_status_name',
+                            name: 'merchmake_status_name'
                         },
                         {
                             data: 'action',
