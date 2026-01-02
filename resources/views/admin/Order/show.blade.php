@@ -1,58 +1,56 @@
 @extends('admin.layouts.common')
 @section('content')
-<style>
-    .order-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        background: #fff;
-        overflow: hidden;
-        margin-bottom: 20px;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-    }
+    <style>
+        .order-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: #fff;
+            overflow: hidden;
+            margin-bottom: 20px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
 
-    .order-card-header {
-        background: #f9fafb;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 10px 15px;
-        font-weight: 600;
-    }
+        .order-card-header {
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 10px 15px;
+            font-weight: 600;
+        }
 
-    .order-card-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+        .order-card-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-    .order-card-table th {
-        text-align: left;
-        padding: 8px 12px;
-        font-weight: 600;
-        color: inherit;
-        width: 40%;
-        vertical-align: top;
-    }
+        .order-card-table th {
+            text-align: left;
+            padding: 8px 12px;
+            font-weight: 600;
+            color: inherit;
+            width: 40%;
+            vertical-align: top;
+        }
 
-    .order-card-table td {
-        padding: 8px 12px;
-        vertical-align: top;
-    }
+        .order-card-table td {
+            padding: 8px 12px;
+            vertical-align: top;
+        }
 
-    .order-section {
-        width: 50%;
-        vertical-align: top;
-    }
+        .order-section {
+            width: 50%;
+            vertical-align: top;
+        }
 
-    .badge {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-
-
-</style>
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    </style>
     <h4 class="py-3 mb-4"><span class="text-muted fw-light">Order/</span>
         Show
     </h4>
@@ -69,103 +67,105 @@
                                 <div class="">
                                     <!-- Two-column table for order/payment and shipping details -->
                                     <!-- <table class="w-100" style="border-collapse: collapse; width: 100%;">
-                                        <tr>
+                                            <tr>
 
-                                            <td style="vertical-align: top; padding-right: 10px;">
-                                                <table style="border-collapse: collapse; width: 100%;">
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Order ID:</strong></th>
-                                                        <td id="order-id">{{ $order->id }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Merchmake Order ID:</strong>
-                                                        </th>
-                                                        <td id="merchmake-order-id">{{ $order->merchmake_order_id }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Payment Method:</strong></th>
-                                                        <td>{{ $order->payment_method }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Payment Status:</strong></th>
-                                                        <td>
-                                                            @php
-                                                                $status = $order->payment_status ?? '';
-                                                                $badgeClass = 'bg-label-primary'; // Default
+                                                <td style="vertical-align: top; padding-right: 10px;">
+                                                    <table style="border-collapse: collapse; width: 100%;">
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Order ID:</strong></th>
+                                                            <td id="order-id">{{ $order->id }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Merchmake Order ID:</strong>
+                                                            </th>
+                                                            <td id="merchmake-order-id">{{ $order->merchmake_order_id }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Payment Method:</strong></th>
+                                                            <td>{{ $order->payment_method }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Payment Status:</strong></th>
+                                                            <td>
+                                                                @php
+                                                                    $status = $order->payment_status ?? '';
+                                                                    $badgeClass = 'bg-label-primary'; // Default
 
-                                                                if ($status === 'Completed') {
-                                                                    $badgeClass = 'bg-label-success';
-                                                                } elseif ($status === 'Refunded') {
-                                                                    $badgeClass = 'bg-label-warning';
-                                                                }
-                                                            @endphp
+                                                                    if ($status === 'Completed') {
+                                                                        $badgeClass = 'bg-label-success';
+                                                                    } elseif ($status === 'Refunded') {
+                                                                        $badgeClass = 'bg-label-warning';
+                                                                    }
+                                                                @endphp
 
-                                                            <span class="badge badge-dim {{ $badgeClass }}">{{ $status }}</span>
-                                                        </td>
-                                                    </tr>
+                                                                <span class="badge badge-dim {{ $badgeClass }}">{{ $status }}</span>
+                                                            </td>
+                                                        </tr>
 
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Order Status:</strong></th>
-                                                        <td>
-                                                            @php
-                                                                $status = $order->order_status ?? '';
-                                                                $badgeClass = 'bg-label-secondary'; // Default badge color
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Order Status:</strong></th>
+                                                            <td>
+                                                                @php
+                                                                    $status = $order->order_status ?? '';
+                                                                    $badgeClass = 'bg-label-secondary'; // Default badge color
 
-                                                                if ($status === 'Completed') {
-                                                                    $badgeClass = 'bg-label-success';
-                                                                } elseif ($status === 'Pending') {
-                                                                    $badgeClass = 'bg-label-primary';
-                                                                } elseif (in_array($status, ['Cancelled', 'Refunded'])) {
-                                                                    $badgeClass = 'bg-label-danger';
-                                                                }
-                                                            @endphp
+                                                                    if ($status === 'Completed') {
+                                                                        $badgeClass = 'bg-label-success';
+                                                                    } elseif ($status === 'Pending') {
+                                                                        $badgeClass = 'bg-label-primary';
+                                                                    } elseif (
+                                                                        in_array($status, ['Cancelled', 'Refunded'])
+                                                                    ) {
+                                                                        $badgeClass = 'bg-label-danger';
+                                                                    }
+                                                                @endphp
 
-                                                            <span class="badge badge-dim {{ $badgeClass }}">{{ $status }}</span>
-                                                        </td>
-                                                    </tr>
+                                                                <span class="badge badge-dim {{ $badgeClass }}">{{ $status }}</span>
+                                                            </td>
+                                                        </tr>
 
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Note:</strong></th>
-                                                        <td id="order-note">{{ $order->note }}</td>
-                                                    </tr>
-                                                </table>
-                                            </td>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Note:</strong></th>
+                                                            <td id="order-note">{{ $order->note }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
 
-                                            <td style="vertical-align: top; padding-left: 20px;">
-                                                <table style="border-collapse: collapse; width: 100%;">
-                                                    <tr>
-                                                        <th colspan="2" style="text-align: left;"><strong>Shipping
-                                                                Address:</strong></th>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Name:</strong></th>
-                                                        <td>{{ $order->shippingAddress->first_name . ' ' . $order->shippingAddress->last_name }}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Email:</strong></th>
-                                                        <td>{{ $order->shippingAddress->email }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Phone:</strong></th>
-                                                        <td>{{ $order->shippingAddress->phone }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Address Line 1:</strong></th>
-                                                        <td>{{ $order->shippingAddress->address_1 }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Address Line 2:</strong></th>
-                                                        <td>{{ $order->shippingAddress->address_2 }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th style="text-align: left;"><strong>Country Code:</strong></th>
-                                                        <td>{{ $order->shippingAddress->country_code }}</td>
-                                                    </tr>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table> -->
+                                                <td style="vertical-align: top; padding-left: 20px;">
+                                                    <table style="border-collapse: collapse; width: 100%;">
+                                                        <tr>
+                                                            <th colspan="2" style="text-align: left;"><strong>Shipping
+                                                                    Address:</strong></th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Name:</strong></th>
+                                                            <td>{{ $order->shippingAddress->first_name . ' ' . $order->shippingAddress->last_name }}
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Email:</strong></th>
+                                                            <td>{{ $order->shippingAddress->email }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Phone:</strong></th>
+                                                            <td>{{ $order->shippingAddress->phone }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Address Line 1:</strong></th>
+                                                            <td>{{ $order->shippingAddress->address_1 }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Address Line 2:</strong></th>
+                                                            <td>{{ $order->shippingAddress->address_2 }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="text-align: left;"><strong>Country Code:</strong></th>
+                                                            <td>{{ $order->shippingAddress->country_code }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table> -->
 
                                     <div class="order-card">
                                         <table class="order-card-table">
@@ -192,10 +192,14 @@
                                                                 @php
                                                                     $status = $order->payment_status ?? '';
                                                                     $badgeClass = 'bg-label-primary';
-                                                                    if ($status === 'Completed') $badgeClass = 'bg-label-success';
-                                                                    elseif ($status === 'Refunded') $badgeClass = 'bg-label-warning';
+                                                                    if ($status === 'Completed') {
+                                                                        $badgeClass = 'bg-label-success';
+                                                                    } elseif ($status === 'Refunded') {
+                                                                        $badgeClass = 'bg-label-warning';
+                                                                    }
                                                                 @endphp
-                                                                <span class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
+                                                                <span
+                                                                    class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -204,11 +208,18 @@
                                                                 @php
                                                                     $status = $order->order_status ?? '';
                                                                     $badgeClass = 'bg-label-secondary';
-                                                                    if ($status === 'Completed') $badgeClass = 'bg-label-success';
-                                                                    elseif ($status === 'Pending') $badgeClass = 'bg-label-primary';
-                                                                    elseif (in_array($status, ['Cancelled','Refunded'])) $badgeClass = 'bg-label-danger';
+                                                                    if ($status === 'Completed') {
+                                                                        $badgeClass = 'bg-label-success';
+                                                                    } elseif ($status === 'Pending') {
+                                                                        $badgeClass = 'bg-label-primary';
+                                                                    } elseif (
+                                                                        in_array($status, ['Cancelled', 'Refunded'])
+                                                                    ) {
+                                                                        $badgeClass = 'bg-label-danger';
+                                                                    }
                                                                 @endphp
-                                                                <span class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
+                                                                <span
+                                                                    class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -217,11 +228,18 @@
                                                                 @php
                                                                     $status = $order->merchmake_status_name ?? '';
                                                                     $badgeClass = 'bg-label-secondary';
-                                                                    if ($status === 'Completed') $badgeClass = 'bg-label-success';
-                                                                    elseif ($status === 'Pending') $badgeClass = 'bg-label-primary';
-                                                                    elseif (in_array($status, ['Cancelled','Refunded'])) $badgeClass = 'bg-label-danger';
+                                                                    if ($status === 'Completed') {
+                                                                        $badgeClass = 'bg-label-success';
+                                                                    } elseif ($status === 'Pending') {
+                                                                        $badgeClass = 'bg-label-primary';
+                                                                    } elseif (
+                                                                        in_array($status, ['Cancelled', 'Refunded'])
+                                                                    ) {
+                                                                        $badgeClass = 'bg-label-danger';
+                                                                    }
                                                                 @endphp
-                                                                <span class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
+                                                                <span
+                                                                    class="badge {{ $badgeClass }}">{{ strtoupper($status) }}</span>
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -237,7 +255,8 @@
                                                     <table class="order-card-table">
                                                         <tr>
                                                             <th>Name:</th>
-                                                            <td>{{ $order->shippingAddress->first_name . ' ' . $order->shippingAddress->last_name }}</td>
+                                                            <td>{{ $order->shippingAddress->first_name . ' ' . $order->shippingAddress->last_name }}
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>Email:</th>
@@ -300,8 +319,8 @@
 
 
                                                                 <td>
-                                                                    <img src="{{ isset($image_url['image_url']) ? $image_url['image_url'] : '' }}" width="100"
-                                                                        alt="Product Image">
+                                                                    <img src="{{ isset($image_url['image_url']) ? $image_url['image_url'] : '' }}"
+                                                                        width="100" alt="Product Image">
                                                                 </td>
 
 
@@ -315,15 +334,23 @@
                                                                             @if (!empty($item->getOrderItemQrCodes))
                                                                                 @foreach ($item->getOrderItemQrCodes as $qrCode)
                                                                                     <div class="p-2">
-                                                                                        <p>{{ $qrCode->position }} qr for
+                                                                                        <p>{{ $qrCode->position }}
+                                                                                            @if (!empty($qrCode->design_id) && !empty($qrCode->desing_image))
+                                                                                                design for
+                                                                                            @else
+                                                                                                qr for
+                                                                                            @endif
                                                                                             qty
-                                                                                            {{ $key + 1 }}</p>
-                                                                                        @if(!empty($qrCode->design_id )&& !empty($qrCode->desing_image))
+                                                                                            {{ $key + 1 }}
+                                                                                        </p>
+                                                                                        @if (!empty($qrCode->design_id) && !empty($qrCode->desing_image))
                                                                                             <img src="{{ asset('storage/' . $qrCode->desing_file_path) }}"
-                                                                                                width="100" alt="Design Image">
+                                                                                                width="100"
+                                                                                                alt="Design Image">
                                                                                         @else
                                                                                             <img src="{{ asset('storage/' . $qrCode->qr_image_path) }}"
-                                                                                                width="100" alt="QR Image">
+                                                                                                width="100"
+                                                                                                alt="QR Image">
                                                                                         @endif
                                                                                     </div>
                                                                                 @endforeach
