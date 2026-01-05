@@ -1130,6 +1130,43 @@ function removeWhiteBackground($img)
     return $img;
 }
 
+// function resizeWithTransparency($sourcePath, $targetW, $targetH)
+// {
+//     if (!file_exists($sourcePath)) return false;
+
+//     $srcImg = imagecreatefromstring(file_get_contents($sourcePath));
+//     if (!$srcImg) return false;
+
+//     $srcW = imagesx($srcImg);
+//     $srcH = imagesy($srcImg);
+
+//     $dstImg = imagecreatetruecolor($targetW, $targetH);
+//     imagealphablending($dstImg, false);
+//     imagesavealpha($dstImg, true);
+
+//     $transparent = imagecolorallocatealpha($dstImg, 0, 0, 0, 127);
+//     imagefill($dstImg, 0, 0, $transparent);
+
+//     imagecopyresampled($dstImg, $srcImg, 0, 0, 0, 0, $targetW, $targetH, $srcW, $srcH);
+
+//     // Remove white background
+//     $w = imagesx($dstImg);
+//     $h = imagesy($dstImg);
+//     for ($x = 0; $x < $w; $x++) {
+//         for ($y = 0; $y < $h; $y++) {
+//             $rgba = imagecolorat($dstImg, $x, $y);
+//             $colors = imagecolorsforindex($dstImg, $rgba);
+//             if ($colors['red'] > 240 && $colors['green'] > 240 && $colors['blue'] > 240) {
+//                 imagesetpixel($dstImg, $x, $y, $transparent);
+//             }
+//         }
+//     }
+
+//     imagedestroy($srcImg);
+//     return $dstImg;
+// }
+
+// working for remove white patches
 function resizeWithTransparency($sourcePath, $targetW, $targetH)
 {
     if (!file_exists($sourcePath)) return false;
@@ -1141,30 +1178,81 @@ function resizeWithTransparency($sourcePath, $targetW, $targetH)
     $srcH = imagesy($srcImg);
 
     $dstImg = imagecreatetruecolor($targetW, $targetH);
+
+    // IMPORTANT: preserve alpha
     imagealphablending($dstImg, false);
     imagesavealpha($dstImg, true);
 
     $transparent = imagecolorallocatealpha($dstImg, 0, 0, 0, 127);
     imagefill($dstImg, 0, 0, $transparent);
 
-    imagecopyresampled($dstImg, $srcImg, 0, 0, 0, 0, $targetW, $targetH, $srcW, $srcH);
-
-    // Remove white background
-    $w = imagesx($dstImg);
-    $h = imagesy($dstImg);
-    for ($x = 0; $x < $w; $x++) {
-        for ($y = 0; $y < $h; $y++) {
-            $rgba = imagecolorat($dstImg, $x, $y);
-            $colors = imagecolorsforindex($dstImg, $rgba);
-            if ($colors['red'] > 240 && $colors['green'] > 240 && $colors['blue'] > 240) {
-                imagesetpixel($dstImg, $x, $y, $transparent);
-            }
-        }
+    // KEY FIX: disable smoothing
+    if (function_exists('imagesetinterpolation')) {
+        imagesetinterpolation($dstImg, IMG_NEAREST_NEIGHBOUR);
     }
+
+    // Resize WITHOUT blending artifacts
+    imagecopyresized(
+        $dstImg,
+        $srcImg,
+        0, 0, 0, 0,
+        $targetW,
+        $targetH,
+        $srcW,
+        $srcH
+    );
 
     imagedestroy($srcImg);
     return $dstImg;
 }
+
+
+// function cleanLogoArtifacts($img)
+// {
+//     $w = imagesx($img);
+//     $h = imagesy($img);
+
+//     imagealphablending($img, false);
+//     imagesavealpha($img, true);
+
+//     $transparent = imagecolorallocatealpha($img, 0, 0, 0, 127);
+
+//     for ($x = 0; $x < $w; $x++) {
+//         for ($y = 0; $y < $h; $y++) {
+
+//             $rgba = imagecolorat($img, $x, $y);
+//             $c = imagecolorsforindex($img, $rgba);
+
+//             // 1️⃣ Kill semi-transparent pixels
+//             if ($c['alpha'] > 10) {
+//                 imagesetpixel($img, $x, $y, $transparent);
+//                 continue;
+//             }
+
+//             // 2️⃣ Kill light bleed pixels (white/gray halos)
+//             if (
+//                 $c['red']   > 210 &&
+//                 $c['green'] > 210 &&
+//                 $c['blue']  > 210
+//             ) {
+//                 imagesetpixel($img, $x, $y, $transparent);
+//                 continue;
+//             }
+
+//             // 3️⃣ OPTIONAL: remove light blue halo around logo
+//             if (
+//                 $c['blue']  > 180 &&
+//                 $c['red']   > 140 &&
+//                 $c['green'] > 140
+//             ) {
+//                 imagesetpixel($img, $x, $y, $transparent);
+//             }
+//         }
+//     }
+
+//     return $img;
+// }
+
 
 
 function generateDesingWithQr($design_id, $qr_id)
@@ -1385,3 +1473,6 @@ function generateDesingWithQrOrders($design_id, $qr_image)
         ];
     }
 }
+
+
+

@@ -496,6 +496,8 @@ class CartController extends BaseController
                 // $targetH =  360;
                 $qrResized = resizeWithTransparency($qrFilePath, $targetW, $targetH);
 
+                // $qrResized = cleanLogoArtifacts($qrResized);
+
                 // Position & rotation
                 $posX = intval($design->x_axis);
                 $posY = intval($design->y_axis);
@@ -512,7 +514,17 @@ class CartController extends BaseController
                     imagecopy($base, $qrRotated, $posX, $posY, 0, 0, imagesx($qrRotated), imagesy($qrRotated));
                     imagedestroy($qrRotated);
                 } else {
-                    imagecopy($base, $qrResized, $posX, $posY, 0, 0, $targetW, $targetH);
+                    // imagecopy($base, $qrResized, $posX, $posY, 0, 0, $targetW, $targetH);
+                    imagecopy(
+                        $base,
+                        $qrResized,
+                        $posX,
+                        $posY,
+                        0,
+                        0,
+                        imagesx($qrResized),
+                        imagesy($qrResized)
+                    );
                 }
 
                 imagedestroy($qrResized);
