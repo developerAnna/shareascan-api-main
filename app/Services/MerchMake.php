@@ -153,7 +153,11 @@ class MerchMake
                 $custom_decorations = [];
                 if (!empty($item->getOrderItemQrCodes)) {
                     foreach ($item->getOrderItemQrCodes as $qr_code) {
-                        $custom_decorations[strtolower($qr_code->position)] = asset('storage/' . $qr_code->qr_image_path);
+                        if (empty($qr_code->design_id) && empty($qr_code->desing_image)) {
+                            $custom_decorations[strtolower($qr_code->position)] = asset('storage/' . $qr_code->qr_image_path);
+                        } else {
+                            $custom_decorations[strtolower($qr_code->position)] = asset('storage/' . $qr_code->desing_file_path);
+                        }
                     }
                 }
 
@@ -164,6 +168,8 @@ class MerchMake
                     'external_id' => $item->id,
                     'custom_decorations' => $custom_decorations,
                 ];
+
+                Log::info('Line Item: ' . json_encode($lineItems));
             }
         }
 
